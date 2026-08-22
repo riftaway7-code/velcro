@@ -9,8 +9,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT || 4173;
+const IS_SERVERLESS = !!process.env.VERCEL;
 
-app.get("/api/wisp-available", (_, res) => res.json({ ok: true }));
+app.get("/api/wisp-available", (_, res) => res.json({ ok: !IS_SERVERLESS }));
 
 function fetchProxy(target, req, res, depth = 0) {
   if (depth > 3) return res.status(502).end();
@@ -40,14 +41,18 @@ app.get("/api/fetch", (req, res) => {
 
 app.use(express.static(join(__dirname, "public")));
 
-const server = createServer(app);
+if (!IS_SERVERLESS) {
+  const server = createServer(app);
 
-server.on("upgrade", (req, socket, head) => {
-  if (req.url.startsWith("/wisp/")) {
-    wispServer.routeRequest(req, socket, head);
-  }
-});
+  server.on("upgrade", (req, socket, head) => {
+    if (req.url.startsWith("/wisp/")) {
+      wispServer.routeRequest(req, socket, head);
+    }
+  });
 
-server.listen(PORT, () => {
-  console.log(`velcro running at http://localhost:${PORT}`);
-});
+  server.listen(PORT, () => {
+    console.log(`velcro running at http://localhost:${PORT}`);
+  });
+}
+
+export default app;
