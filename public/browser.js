@@ -38,7 +38,7 @@ function hideNavLoading() {
 
 let ready = false;
 let pendingUrl = null;
-let codec = null; // { encodeUrl, decodeUrl }
+let codec = null;
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {

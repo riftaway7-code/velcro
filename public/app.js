@@ -114,7 +114,6 @@
       console.error(err);
     });
 
-  // theme toggle
   var THEME_KEY = "velcro_theme";
   var DARK_THEMES = ["dark", "midnight"];
 
@@ -137,7 +136,6 @@
 
   setTheme(currentTheme());
 
-  // typing tagline
   var typingEl = document.getElementById("typingText");
   var TAGLINE = "i lowk didnt pay for the boosts in the server";
   var typeIndex = 0;

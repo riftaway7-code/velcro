@@ -1,39 +1,38 @@
 # velcro
 
-A games hub and web proxy, self-hosted with Node/Express.
+yo this is velcro, a games hub and a web proxy, self hosted with node and express.
 
-## Features
+## features
 
-- Games catalog with search and category filters
-- Apps catalog for other useful sites
-- A full address-bar browser page for tunneling arbitrary URLs
-- Two proxy engines to choose from: [scramjet](https://github.com/MercuryWorkshop/scramjet) and [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet), switchable in settings
-- Optional custom wisp server
-- Tab cloaking (custom title/favicon) and an "open in about:blank" launch mode
-- Fully custom theming (pick your own background/accent colors) and wallpapers
-- Light/dark aware, no premade theme lock-in
+- games catalog wit search and category filters
+- apps catalog for other useful sitez
+- a full addres bar browser page for tunneling any url you want
+- two proxy engines to chose from, [scramjet](https://github.com/MercuryWorkshop/scramjet) and [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet), switch it in settings
+- optional custom wisp server if u got one
+- tab cloaking (custom title and favicon) plus an "open in about:blank" launch mode
+- fully custom theming, pick ur own bg and accent colors, and wallpapers too
+- light and dark aware, no premade theme lockin
 
-## No tracking
+## no tracking
 
-velcro ships with zero analytics, telemetry, or logging of any kind. Nothing about your
-usage is sent anywhere except what's required to load the page and proxy your traffic.
+velcro ships with zero analytics, telemetry, or logging of any kind, fr. nothing about your usage gets sent anywhere except whats needed to load the page and proxy ur traffic.
 
-## Credits
+## credits
 
-- [Mercury Workshop](https://github.com/MercuryWorkshop) — scramjet, bare-mux, epoxy-transport, wisp-js
-- [TitaniumNetwork](https://github.com/titaniumnetwork-dev) — Ultraviolet
-- Google Fonts — Sour Gummy, Nunito, Material Symbols
-- Built alongside [rift](https://github.com/raahimsyed/rift) and photon, the author's earlier projects
+- [Mercury Workshop](https://github.com/MercuryWorkshop), scramjet, bare mux, epoxy transport, wisp js
+- [TitaniumNetwork](https://github.com/titaniumnetwork-dev), Ultraviolet
+- Google Fonts, Sour Gummy, Nunito, Material Symbols
+- built alongside [rift](https://github.com/raahimsyed/rift) and photon, my earlier projects
 
-## Running locally
+## running locally
 
 ```sh
 npm install
 npm run dev
 ```
 
-Opens on `http://localhost:4173`.
+opens on `http://localhost:4173`, ez.
 
-## License
+## license
 
-MIT — see [LICENSE](./LICENSE).
+MIT, see [LICENSE](./LICENSE).

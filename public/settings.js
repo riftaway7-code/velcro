@@ -7,7 +7,6 @@
     { label: "none", title: "", favicon: "" },
   ];
 
-  // custom theme
   var themeBg = document.getElementById("themeBg");
   var themeAccent = document.getElementById("themeAccent");
   var themeReset = document.getElementById("themeReset");
@@ -35,7 +34,6 @@
     themeAccent.value = computedHex("--accent", "#3ddc7a");
   });
 
-  // wallpaper
   var wallpaperGrid = document.getElementById("wallpaperGrid");
   var wallpaperCustom = document.getElementById("wallpaperCustom");
   var wallpaperApplyCustom = document.getElementById("wallpaperApplyCustom");
@@ -77,7 +75,6 @@
     renderWallpaperGrid();
   });
 
-  // tab cloak
   var presetRow = document.getElementById("presetRow");
   var titleInput = document.getElementById("cloakTitle");
   var faviconInput = document.getElementById("cloakFavicon");
@@ -110,7 +107,6 @@
     faviconInput.value = "";
   });
 
-  // launch mode
   var LAUNCH_KEY = "velcro_launch_mode";
   var launchSwitch = document.getElementById("launchSwitch");
 
@@ -127,7 +123,6 @@
 
   renderLaunchSwitch();
 
-  // proxy engine
   var ENGINE_KEY = "velcro_proxy_engine";
   var engineSwitch = document.getElementById("engineSwitch");
 
@@ -144,7 +139,6 @@
 
   renderEngineSwitch();
 
-  // custom wisp server
   var WISP_KEY = "velcro_wisp_server";
   var wispServerInput = document.getElementById("wispServer");
   var wispSave = document.getElementById("wispSave");
