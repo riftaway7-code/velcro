@@ -124,8 +124,7 @@
 
   function currentTheme() {
     var saved = localStorage.getItem(THEME_KEY);
-    if (saved) return saved;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return saved || "light";
   }
 
   function setTheme(theme) {

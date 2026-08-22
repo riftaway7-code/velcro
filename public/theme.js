@@ -149,7 +149,7 @@
     },
     apply: function () {
       var saved = localStorage.getItem(THEME_KEY);
-      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      var theme = saved || "light";
       document.documentElement.setAttribute("data-theme", theme);
 
       var custom = this.getCustom();
