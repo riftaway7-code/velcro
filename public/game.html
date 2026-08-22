@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>velcro</title>
+<script src="/theme.js"></script>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+  html, body { height: 100%; overflow: hidden; }
+
+  .cover-navbar {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 18px;
+    background: var(--bg-elevated);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .cover-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cover-section.center { justify-content: center; min-width: 0; }
+  .cover-section.right { justify-content: flex-end; }
+
+  .cover-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 420px;
+  }
+
+  .cover-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--icon-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .cover-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+  .cover-btn .material-symbols-rounded { font-size: 20px; }
+
+  .cover-viewport {
+    width: 100%;
+    height: calc(100% - 60px);
+    border: none;
+    display: block;
+    background: #000;
+  }
+</style>
+</head>
+<body>
+
+<nav class="cover-navbar">
+  <div class="cover-section">
+    <a href="/" class="cover-btn" title="Back to velcro">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </a>
+  </div>
+  <div class="cover-section center">
+    <span class="cover-title" id="gameTitle">loading&hellip;</span>
+  </div>
+  <div class="cover-section right">
+    <a href="/settings.html" class="cover-btn" title="Settings">
+      <span class="material-symbols-rounded">settings</span>
+    </a>
+    <button class="cover-btn" id="closeBtn" title="Close">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+  </div>
+</nav>
+
+<iframe id="gameFrame" class="cover-viewport" allowfullscreen></iframe>
+
+<script src="/cloak.js"></script>
+<script type="module">
+  const params = new URLSearchParams(location.search);
+  const gameUrl = params.get("url");
+  const title = params.get("title") || "game";
+  history.replaceState({}, "", "/game.html");
+  document.getElementById("gameTitle").textContent = title;
+  document.title = title + " — velcro";
+  window.VelcroCloak?.apply();
+  document.getElementById("closeBtn").addEventListener("click", () => history.back());
+
+  const frame = document.getElementById("gameFrame");
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function waitForActivation(reg) {
+    if (reg.active) return;
+    const sw = reg.installing || reg.waiting;
+    if (!sw) return;
+    await new Promise((resolve) => {
+      sw.addEventListener("statechange", function handler() {
+        if (this.state === "activated") { this.removeEventListener("statechange", handler); resolve(); }
+      });
+    });
+  }
+
+  async function initScramjet() {
+    const customWisp = localStorage.getItem("velcro_wisp_server");
+    const localWisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
+    const hasLocalWisp = await fetch("/api/wisp-available").then(r => r.ok).catch(() => false);
+    const WISP = customWisp || (hasLocalWisp ? localWisp : "wss://anura.pro/wisp/");
+
+    const { ScramjetController } = await import("/scramjet/scramjet.bundle.js");
+    const { BareMuxConnection } = await import("/bare-mux/index.mjs");
+
+    const controller = new ScramjetController({
+      prefix: "/scramjet/",
+      files: {
+        wasm: "/scramjet/scramjet.wasm.wasm",
+        all: "/scramjet/scramjet.all.js",
+        sync: "/scramjet/scramjet.sync.js",
+      },
+    });
+
+    const existing = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(existing.map((r) => r.unregister()));
+    if (existing.length > 0) await new Promise((r) => setTimeout(r, 600));
+    await controller.init();
+    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/scramjet/" });
+    await waitForActivation(reg);
+    const conn = new BareMuxConnection("/bare-mux/worker.js");
+    await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
+    if (gameUrl) frame.src = controller.encodeUrl(gameUrl);
+  }
+
+  async function initUv() {
+    const customWisp = localStorage.getItem("velcro_wisp_server");
+    const localWisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
+    const hasLocalWisp = await fetch("/api/wisp-available").then(r => r.ok).catch(() => false);
+    const WISP = customWisp || (hasLocalWisp ? localWisp : "wss://anura.pro/wisp/");
+
+    await loadScript("/uv/uv.bundle.js");
+    await loadScript("/uv/uv.config.js");
+    const { BareMuxConnection } = await import("/bare-mux/index.mjs");
+
+    const existing = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(existing.map((r) => r.unregister()));
+    if (existing.length > 0) await new Promise((r) => setTimeout(r, 600));
+    const reg = await navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/" });
+    await waitForActivation(reg);
+
+    const conn = new BareMuxConnection("/bare-mux/worker.js");
+    await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
+
+    if (gameUrl) frame.src = self.__uv$config.prefix + self.__uv$config.encodeUrl(gameUrl);
+  }
+
+  async function init() {
+    const engine = localStorage.getItem("velcro_proxy_engine") || "scramjet";
+    if (engine === "uv") return initUv();
+    return initScramjet();
+  }
+
+  (async () => {
+    try {
+      await init();
+    } catch (err) {
+      console.error("Proxy failed, loading game directly:", err);
+      if (gameUrl) frame.src = gameUrl;
+    }
+  })();
+</script>
+</body>
+</html>

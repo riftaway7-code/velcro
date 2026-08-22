@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>browser — velcro</title>
+<script src="/theme.js"></script>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+  html, body { height: 100%; overflow: hidden; }
+
+  .browser-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .browser-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--bg-elevated);
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .browser-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--icon-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .browser-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+  .browser-btn .material-symbols-rounded { font-size: 20px; }
+
+  .url-bar-wrapper {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    transition: border-color 0.2s ease;
+  }
+
+  .url-bar-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+
+  .url-lock { color: var(--icon-color); font-size: 18px; flex-shrink: 0; }
+
+  .url-bar {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+  }
+
+  .url-bar::placeholder { color: var(--text-muted); }
+
+  .url-go {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .url-go:hover { background: var(--accent-bright); }
+
+  .loading-line {
+    height: 3px;
+    width: 0;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  .browser-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .browser-start {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .browser-start h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(30px, 5vw, 48px);
+    margin: 0;
+    color: var(--text);
+  }
+
+  .browser-start p { color: var(--text-muted); margin: 0; }
+
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    max-width: 480px;
+  }
+
+  .quick-link {
+    border: 2px solid var(--filter-border);
+    background: var(--filter-bg);
+    color: var(--filter-text);
+    border-radius: 999px;
+    padding: 9px 20px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .quick-link:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+  .proxy-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #000;
+  }
+
+  .hidden { display: none !important; }
+
+  .nav-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--bg);
+    text-align: center;
+    padding: 20px;
+  }
+
+  .nav-loading .spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .nav-loading-msg { color: var(--text-muted); font-size: 14px; max-width: 320px; }
+
+  .browser-blocked {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="browser-shell">
+  <div class="browser-topbar">
+    <a href="/" class="browser-btn" title="Home">
+      <span class="material-symbols-rounded">home</span>
+    </a>
+    <button class="browser-btn" id="backBtn" title="Back">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <button class="browser-btn" id="forwardBtn" title="Forward">
+      <span class="material-symbols-rounded">arrow_forward</span>
+    </button>
+    <button class="browser-btn" id="reloadBtn" title="Reload">
+      <span class="material-symbols-rounded">refresh</span>
+    </button>
+    <div class="url-bar-wrapper">
+      <span class="material-symbols-rounded url-lock">lock</span>
+      <input id="urlBar" class="url-bar" type="text" placeholder="saerch or enter a url" spellcheck="false" autocomplete="off" />
+      <button class="url-go" id="goBtn">go</button>
+    </div>
+    <a href="/settings.html" class="browser-btn" title="Settings">
+      <span class="material-symbols-rounded">settings</span>
+    </a>
+  </div>
+  <div class="loading-line" id="loadingBar"></div>
+
+  <div class="browser-content" id="browserContent">
+    <div class="browser-start">
+      <h2>velcro browser</h2>
+      <p>tunnel anywhere, no cap</p>
+      <div class="quick-links">
+        <button class="quick-link" data-url="https://google.com">google</button>
+        <button class="quick-link" data-url="https://youtube.com">youtube</button>
+        <button class="quick-link" data-url="https://reddit.com">reddit</button>
+        <button class="quick-link" data-url="https://github.com">github</button>
+        <button class="quick-link" data-url="https://wikipedia.org">wikipedia</button>
+        <button class="quick-link" data-url="https://discord.com">discord</button>
+      </div>
+    </div>
+
+    <div class="nav-loading hidden" id="navLoading">
+      <div class="spinner"></div>
+      <p class="nav-loading-msg" id="navLoadingMsg">loading the loading&hellip;</p>
+    </div>
+
+    <iframe id="proxyFrame" class="proxy-frame hidden" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></iframe>
+
+    <div class="browser-blocked hidden" id="browserBlocked">
+      <p>proxy not available on this server &mdash; requires a server with wisp support</p>
+    </div>
+  </div>
+</div>
+
+<script src="/cloak.js"></script>
+<script type="module" src="/browser.js"></script>
+</body>
+</html>

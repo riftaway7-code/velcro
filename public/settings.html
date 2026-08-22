@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>settings — velcro</title>
+<script src="/theme.js"></script>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+  .settings-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px clamp(16px, 4vw, 48px);
+  }
+
+  .settings-topbar h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    margin: 0;
+    color: var(--text);
+  }
+
+  main.settings-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 48px) 80px;
+  }
+
+  .settings-section {
+    margin-bottom: 44px;
+  }
+
+  .settings-section h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text);
+    margin: 0 0 6px;
+  }
+
+  .settings-hint {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 18px;
+  }
+
+  .color-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 18px;
+  }
+
+  .color-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .wallpaper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .wallpaper-swatch {
+    height: 56px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    padding: 0;
+    background-size: cover;
+    background-position: center;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .wallpaper-swatch:hover { transform: translateY(-2px); }
+  .wallpaper-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  .color-field input[type="color"] {
+    width: 64px;
+    height: 44px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .settings-group {
+    background: var(--bg-elevated);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .preset-btn {
+    border: 2px solid var(--filter-border);
+    background: var(--filter-bg);
+    color: var(--filter-text);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+  .settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .settings-field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .settings-field input {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .settings-field input:focus { border-color: var(--accent); }
+
+  .settings-actions { display: flex; gap: 10px; margin-top: 6px; }
+
+  .settings-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    background: var(--accent);
+    color: #ffffff;
+    transition: background 0.15s ease;
+  }
+
+  .settings-btn:hover { background: var(--accent-bright); }
+
+  .settings-btn.ghost {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text);
+  }
+
+  .settings-btn.ghost:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+  .launch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .launch-row p { margin: 0; color: var(--text-muted); font-size: 14px; max-width: 42ch; }
+
+  .switch {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+
+  .switch .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .switch.on { border-color: var(--accent); }
+  .switch.on .knob { transform: translateX(22px); background: var(--accent); }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--icon-color);
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .back-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+  .back-btn .material-symbols-rounded { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<header class="settings-topbar">
+  <a href="/" class="back-btn" title="Back to velcro">
+    <span class="material-symbols-rounded">arrow_back</span>
+  </a>
+  <h1>settings</h1>
+</header>
+
+<nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
+  <a href="/"><span class="material-symbols-rounded">sports_esports</span>games</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
+  <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
+  <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
+  <a href="/settings.html" class="active"><span class="material-symbols-rounded">settings</span>settings</a>
+</nav>
+
+<main class="settings-main">
+
+  <section class="settings-section">
+    <h2>theme</h2>
+    <p class="settings-hint">pick your own colors. applies everywhere, instantly.</p>
+    <div class="settings-group">
+      <div class="color-row">
+        <div class="color-field">
+          <label>background</label>
+          <input type="color" id="themeBg" />
+        </div>
+        <div class="color-field">
+          <label>accent</label>
+          <input type="color" id="themeAccent" />
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn ghost" id="themeReset">reset to default</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>wallpaper</h2>
+    <p class="settings-hint">a background instead of a flat color. optional.</p>
+    <div class="settings-group">
+      <div class="wallpaper-grid" id="wallpaperGrid"></div>
+      <div class="settings-field">
+        <label>custom image url</label>
+        <input type="text" id="wallpaperCustom" placeholder="https://example.com/image.jpg" autocomplete="off" />
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn" id="wallpaperApplyCustom">apply</button>
+        <button class="settings-btn ghost" id="wallpaperReset">none</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>tab cloak</h2>
+    <p class="settings-hint">disguise this tab's title and icon. applies on every velcro page.</p>
+    <div class="settings-group">
+      <div class="preset-row" id="presetRow"></div>
+      <div class="settings-field">
+        <label>page title</label>
+        <input type="text" id="cloakTitle" placeholder="Google Classroom" />
+      </div>
+      <div class="settings-field">
+        <label>favicon url</label>
+        <input type="text" id="cloakFavicon" placeholder="https://ssl.gstatic.com/classroom/favicon.png" />
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn" id="cloakSave">save</button>
+        <button class="settings-btn ghost" id="cloakReset">reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>launch mode</h2>
+    <p class="settings-hint">how games open when you click them.</p>
+    <div class="settings-group">
+      <div class="launch-row">
+        <p>open games in a new <strong>about:blank</strong> tab, so the address bar never shows a real url</p>
+        <div class="switch" id="launchSwitch"><div class="knob"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>proxy engine</h2>
+    <p class="settings-hint">which engine tunnels games, apps, and the browser page.</p>
+    <div class="settings-group">
+      <div class="launch-row">
+        <p><strong>scramjet</strong> (default) or <strong>ultraviolet</strong></p>
+        <div class="switch" id="engineSwitch"><div class="knob"></div></div>
+      </div>
+      <div class="settings-field" style="margin-top: 16px;">
+        <label>custom wisp server (optional, scramjet only)</label>
+        <input type="text" id="wispServer" placeholder="wss://your-wisp-server.example/wisp/" />
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn" id="wispSave">save</button>
+        <button class="settings-btn ghost" id="wispReset">clear</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/cloak.js"></script>
+<script src="/settings.js"></script>
+</body>
+</html>

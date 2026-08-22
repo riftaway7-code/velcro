@@ -1,0 +1,14 @@
+[
+  { "id": "docs", "title": "Google Docs", "url": "https://docs.google.com", "thumbnail": "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico", "category": "Productivity" },
+  { "id": "sheets", "title": "Google Sheets", "url": "https://sheets.google.com", "thumbnail": "https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico", "category": "Productivity" },
+  { "id": "slides", "title": "Google Slides", "url": "https://slides.google.com", "thumbnail": "https://ssl.gstatic.com/docs/presentations/images/favicon5.ico", "category": "Productivity" },
+  { "id": "desmos", "title": "Desmos", "url": "https://www.desmos.com/calculator", "thumbnail": "https://www.desmos.com/favicon.ico", "category": "Tools" },
+  { "id": "youtube", "title": "YouTube", "url": "https://www.youtube.com", "thumbnail": "https://www.youtube.com/favicon.ico", "category": "Media" },
+  { "id": "discord", "title": "Discord", "url": "https://discord.com/app", "thumbnail": "https://discord.com/assets/favicon.ico", "category": "Social" },
+  { "id": "spotify", "title": "Spotify", "url": "https://open.spotify.com", "thumbnail": "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png", "category": "Media" },
+  { "id": "reddit", "title": "Reddit", "url": "https://www.reddit.com", "thumbnail": "https://www.redditstatic.com/favicon.ico", "category": "Social" },
+  { "id": "github", "title": "GitHub", "url": "https://github.com", "thumbnail": "https://github.githubassets.com/favicons/favicon.svg", "category": "Tools" },
+  { "id": "wikipedia", "title": "Wikipedia", "url": "https://www.wikipedia.org", "thumbnail": "https://www.wikipedia.org/static/favicon/wikipedia.ico", "category": "Tools" },
+  { "id": "translate", "title": "Google Translate", "url": "https://translate.google.com", "thumbnail": "https://ssl.gstatic.com/translate/favicon.ico", "category": "Tools" },
+  { "id": "khanacademy", "title": "Khan Academy", "url": "https://www.khanacademy.org", "thumbnail": "https://www.khanacademy.org/favicon.ico", "category": "Productivity" }
+]
