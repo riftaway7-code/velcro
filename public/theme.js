@@ -2,6 +2,13 @@
   var CUSTOM_KEY = "velcro_custom_theme";
   var THEME_KEY = "velcro_theme";
   var WALLPAPER_KEY = "velcro_wallpaper";
+  var CURSOR_KEY = "velcro_cursor";
+
+  var CURSORS = {
+    cat: { label: "cat", css: "url('/assets/cursor-cat.png') 32 32, auto", preview: "/assets/cursor-cat.png" },
+    "cat-black": { label: "black cat", css: "url('/assets/cursor-cat-black.png') 32 32, auto", preview: "/assets/cursor-cat-black.png" },
+    none: { label: "default", css: "auto", preview: null },
+  };
 
   var WALLPAPERS = {
     aurora: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
@@ -123,8 +130,21 @@
     document.documentElement.style.setProperty("--wallpaper-scrim", "0.45");
   }
 
+  function applyCursor(value) {
+    var choice = CURSORS[value] ? value : "cat";
+    document.documentElement.style.setProperty("--custom-cursor", CURSORS[choice].css);
+  }
+
   var VelcroTheme = {
     wallpapers: WALLPAPERS,
+    cursors: CURSORS,
+    getCursor: function () {
+      return localStorage.getItem(CURSOR_KEY) || "cat";
+    },
+    setCursor: function (value) {
+      localStorage.setItem(CURSOR_KEY, value);
+      applyCursor(value);
+    },
     getWallpaper: function () {
       return localStorage.getItem(WALLPAPER_KEY) || "none";
     },
@@ -158,6 +178,7 @@
       }
 
       applyWallpaper(this.getWallpaper());
+      applyCursor(this.getCursor());
     },
   };
 

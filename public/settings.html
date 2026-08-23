@@ -93,6 +93,51 @@
   .wallpaper-swatch:hover { transform: translateY(-2px); }
   .wallpaper-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
+  .cursor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+  }
+
+  .cursor-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 10px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .cursor-swatch:hover { transform: translateY(-2px); }
+  .cursor-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  .cursor-swatch img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .cursor-swatch .cursor-none-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--icon-color);
+  }
+
+  .cursor-swatch span.cursor-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: lowercase;
+  }
+
   .color-field input[type="color"] {
     width: 64px;
     height: 44px;
@@ -292,6 +337,14 @@
         <button class="settings-btn" id="wallpaperApplyCustom">apply</button>
         <button class="settings-btn ghost" id="wallpaperReset">none</button>
       </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>cursor</h2>
+    <p class="settings-hint">pick your cursor.</p>
+    <div class="settings-group">
+      <div class="cursor-grid" id="cursorGrid"></div>
     </div>
   </section>
 

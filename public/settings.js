@@ -75,6 +75,40 @@
     renderWallpaperGrid();
   });
 
+  var cursorGrid = document.getElementById("cursorGrid");
+
+  function renderCursorGrid() {
+    var current = window.VelcroTheme.getCursor();
+    cursorGrid.innerHTML = "";
+    Object.keys(window.VelcroTheme.cursors).forEach(function (id) {
+      var cursor = window.VelcroTheme.cursors[id];
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cursor-swatch" + (current === id ? " active" : "");
+      if (cursor.preview) {
+        var img = document.createElement("img");
+        img.src = cursor.preview;
+        btn.appendChild(img);
+      } else {
+        var iconWrap = document.createElement("span");
+        iconWrap.className = "cursor-none-icon";
+        iconWrap.innerHTML = '<span class="material-symbols-rounded">near_me</span>';
+        btn.appendChild(iconWrap);
+      }
+      var label = document.createElement("span");
+      label.className = "cursor-label";
+      label.textContent = cursor.label;
+      btn.appendChild(label);
+      btn.addEventListener("click", function () {
+        window.VelcroTheme.setCursor(id);
+        renderCursorGrid();
+      });
+      cursorGrid.appendChild(btn);
+    });
+  }
+
+  renderCursorGrid();
+
   var presetRow = document.getElementById("presetRow");
   var titleInput = document.getElementById("cloakTitle");
   var faviconInput = document.getElementById("cloakFavicon");
