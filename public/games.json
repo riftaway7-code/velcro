@@ -1,5 +1,12 @@
 [
   {
+    "id": "dunjunz",
+    "title": "Dunjunz",
+    "url": "https://www.dunjunz.com/",
+    "thumbnail": "https://www.dunjunz.com/og-image.png",
+    "category": "Adventure"
+  },
+  {
     "id": "geometry-dash",
     "title": "Geometry Dash",
     "url": "https://frog.hpsschools.org/stuff/selfhosted/gdlite/",
