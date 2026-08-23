@@ -5,6 +5,10 @@
   var searchInput = document.getElementById("searchInput");
   var themeToggle = document.getElementById("themeToggle");
   var scrollTopBtn = document.getElementById("scrollTop");
+  var recentSection = document.getElementById("recentSection");
+  var recentGrid = document.getElementById("recentGrid");
+  var topSection = document.getElementById("topSection");
+  var topGrid = document.getElementById("topGrid");
 
   scrollTopBtn.addEventListener("click", function () {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -28,6 +32,58 @@
     win.document.close();
   }
 
+  var RECENT_KEY = "velcro_recent_games";
+  var PLAY_COUNTS_KEY = "velcro_play_counts";
+
+  function recordPlay(id) {
+    try {
+      var recent = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      recent = recent.filter(function (existingId) { return existingId !== id; });
+      recent.unshift(id);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, 10)));
+
+      var counts = JSON.parse(localStorage.getItem(PLAY_COUNTS_KEY) || "{}");
+      counts[id] = (counts[id] || 0) + 1;
+      localStorage.setItem(PLAY_COUNTS_KEY, JSON.stringify(counts));
+    } catch (e) {}
+  }
+
+  function buildCard(g) {
+    var a = document.createElement("a");
+    a.className = "game-card";
+    var gameUrl = "/game.html?url=" + encodeURIComponent(g.url) + "&title=" + encodeURIComponent(g.title);
+    a.href = gameUrl;
+
+    a.addEventListener("click", function (e) {
+      recordPlay(g.id);
+      if (localStorage.getItem("velcro_launch_mode") === "about-blank") {
+        e.preventDefault();
+        openAboutBlank(gameUrl);
+      }
+    });
+
+    var cover = document.createElement("span");
+    cover.className = "cover";
+    cover.style.backgroundImage = "url('" + g.thumbnail + "')";
+
+    var info = document.createElement("span");
+    info.className = "info";
+
+    var name = document.createElement("span");
+    name.className = "name";
+    name.textContent = g.title;
+
+    var cat = document.createElement("span");
+    cat.className = "cat";
+    cat.textContent = g.category;
+
+    info.appendChild(name);
+    info.appendChild(cat);
+    a.appendChild(cover);
+    a.appendChild(info);
+    return a;
+  }
+
   function renderGrid() {
     var query = searchInput.value.trim().toLowerCase();
     var filtered = games.filter(function (g) {
@@ -40,41 +96,37 @@
     emptyEl.hidden = filtered.length !== 0;
 
     var frag = document.createDocumentFragment();
-    filtered.forEach(function (g) {
-      var a = document.createElement("a");
-      a.className = "game-card";
-      var gameUrl = "/game.html?url=" + encodeURIComponent(g.url) + "&title=" + encodeURIComponent(g.title);
-      a.href = gameUrl;
-
-      if (localStorage.getItem("velcro_launch_mode") === "about-blank") {
-        a.addEventListener("click", function (e) {
-          e.preventDefault();
-          openAboutBlank(gameUrl);
-        });
-      }
-
-      var cover = document.createElement("span");
-      cover.className = "cover";
-      cover.style.backgroundImage = "url('" + g.thumbnail + "')";
-
-      var info = document.createElement("span");
-      info.className = "info";
-
-      var name = document.createElement("span");
-      name.className = "name";
-      name.textContent = g.title;
-
-      var cat = document.createElement("span");
-      cat.className = "cat";
-      cat.textContent = g.category;
-
-      info.appendChild(name);
-      info.appendChild(cat);
-      a.appendChild(cover);
-      a.appendChild(info);
-      frag.appendChild(a);
-    });
+    filtered.forEach(function (g) { frag.appendChild(buildCard(g)); });
     gridEl.appendChild(frag);
+  }
+
+  function renderRow(section, grid, list) {
+    grid.innerHTML = "";
+    section.hidden = list.length === 0;
+    var frag = document.createDocumentFragment();
+    list.forEach(function (g) { frag.appendChild(buildCard(g)); });
+    grid.appendChild(frag);
+  }
+
+  function renderRecent() {
+    var recentIds;
+    try { recentIds = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch (e) { recentIds = []; }
+    var list = recentIds
+      .map(function (id) { return games.find(function (g) { return g.id === id; }); })
+      .filter(Boolean)
+      .slice(0, 10);
+    renderRow(recentSection, recentGrid, list);
+  }
+
+  function renderTop() {
+    var counts;
+    try { counts = JSON.parse(localStorage.getItem(PLAY_COUNTS_KEY) || "{}"); } catch (e) { counts = {}; }
+    var list = Object.keys(counts)
+      .sort(function (a, b) { return counts[b] - counts[a]; })
+      .map(function (id) { return games.find(function (g) { return g.id === id; }); })
+      .filter(Boolean)
+      .slice(0, 10);
+    renderRow(topSection, topGrid, list);
   }
 
   function buildPills() {
@@ -106,6 +158,8 @@
       games = data;
       buildPills();
       renderGrid();
+      renderRecent();
+      renderTop();
     })
     .catch(function (err) {
       gridEl.innerHTML = "";
