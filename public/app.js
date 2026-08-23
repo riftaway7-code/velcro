@@ -158,4 +158,61 @@
     var next = DARK_THEMES.indexOf(document.documentElement.getAttribute("data-theme")) !== -1 ? "light" : "dark";
     setTheme(next);
   });
+
+  var PRESENCE_KEY = "velcro_presence_id";
+  var activeUsersLine = document.getElementById("activeUsersLine");
+  var totalUsersLine = document.getElementById("totalUsersLine");
+
+  function getPresenceId() {
+    var id = sessionStorage.getItem(PRESENCE_KEY);
+    if (!id) {
+      id = "tab_" + Math.random().toString(36).slice(2) + "_" + Date.now().toString(36);
+      sessionStorage.setItem(PRESENCE_KEY, id);
+    }
+    return id;
+  }
+
+  function pingPresence() {
+    var id = getPresenceId();
+    fetch("/api/presence/ping", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id }),
+      keepalive: true,
+    }).catch(function () {});
+  }
+
+  function leavePresence() {
+    var id = getPresenceId();
+    var payload = JSON.stringify({ id: id });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon("/api/presence/leave", new Blob([payload], { type: "application/json" }));
+    } else {
+      fetch("/api/presence/leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(function () {});
+    }
+  }
+
+  function refreshStats() {
+    fetch("/api/stats/users")
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        activeUsersLine.textContent = data.activeUsers + " online";
+        totalUsersLine.textContent = data.totalUsers + " total";
+      })
+      .catch(function () {
+        activeUsersLine.textContent = "unavailable";
+        totalUsersLine.textContent = "unavailable";
+      });
+  }
+
+  pingPresence();
+  refreshStats();
+  setInterval(pingPresence, 20000);
+  setInterval(refreshStats, 15000);
+  window.addEventListener("pagehide", leavePresence);
 })();

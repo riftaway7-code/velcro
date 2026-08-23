@@ -248,6 +248,31 @@ main {
   min-height: 1.4em;
 }
 
+.user-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.user-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px 1px var(--accent-glow);
+}
+
 .caret {
   display: inline-block;
   width: 2px;

@@ -11,7 +11,42 @@ const app = express();
 const PORT = process.env.PORT || 4173;
 const IS_SERVERLESS = !!process.env.VERCEL;
 
+app.use(express.json());
+
 app.get("/api/wisp-available", (_, res) => res.json({ ok: !IS_SERVERLESS }));
+
+const PRESENCE_TTL_MS = 30000;
+const presenceMap = new Map();
+let totalUsers = 0;
+const seenIds = new Set();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, lastSeenAt] of presenceMap.entries()) {
+    if (now - lastSeenAt > PRESENCE_TTL_MS) presenceMap.delete(id);
+  }
+}, 10000);
+
+app.post("/api/presence/ping", (req, res) => {
+  const id = String(req.body?.id || "").slice(0, 64);
+  if (!id) return res.status(400).json({ ok: false });
+  presenceMap.set(id, Date.now());
+  if (!seenIds.has(id)) {
+    seenIds.add(id);
+    totalUsers++;
+  }
+  res.json({ ok: true });
+});
+
+app.post("/api/presence/leave", (req, res) => {
+  const id = String(req.body?.id || "").slice(0, 64);
+  if (id) presenceMap.delete(id);
+  res.json({ ok: true });
+});
+
+app.get("/api/stats/users", (_, res) => {
+  res.json({ ok: true, totalUsers, activeUsers: presenceMap.size });
+});
 
 function fetchProxy(target, req, res, depth = 0) {
   if (depth > 3) return res.status(502).end();
