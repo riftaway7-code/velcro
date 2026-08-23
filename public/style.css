@@ -68,6 +68,7 @@ body {
   font-family: var(--font-body);
   min-height: 100vh;
   position: relative;
+  cursor: url('/assets/cursor-cat.png') 32 32, auto;
   transition: background 0.25s ease, color 0.25s ease;
 }
 
