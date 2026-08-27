@@ -24,12 +24,14 @@
   function openAboutBlank(url) {
     var win = window.open("about:blank", "_blank");
     if (!win) return;
-    win.document.open();
-    win.document.write(
-      '<!doctype html><html><head><title>about:blank</title><style>html,body{margin:0;height:100%;background:#000}iframe{border:none;width:100%;height:100%;display:block}</style></head>' +
-      '<body><iframe src="' + url.replace(/"/g, "&quot;") + '"></iframe></body></html>'
-    );
-    win.document.close();
+    var d = win.document;
+    d.title = "about:blank";
+    d.body.style.cssText = "margin:0;height:100%;background:#000";
+    d.documentElement.style.height = "100%";
+    var frame = d.createElement("iframe");
+    frame.src = url;
+    frame.style.cssText = "border:none;position:fixed;inset:0;width:100%;height:100%;display:block";
+    d.body.appendChild(frame);
   }
 
   var RECENT_KEY = "velcro_recent_games";

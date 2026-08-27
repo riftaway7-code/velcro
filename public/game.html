@@ -96,7 +96,17 @@
 <script src="/cloak.js"></script>
 <script type="module">
   const params = new URLSearchParams(location.search);
-  const gameUrl = params.get("url");
+  // url comes from the query string, so a shared link could carry javascript:,
+  // data:, etc. The proxy engines are meant to load arbitrary http(s) targets;
+  // anything with a non-http(s) scheme is rejected here before it can reach an
+  // encodeUrl() call or the raw frame.src fallback below.
+  function sanitizeTarget(raw) {
+    if (!raw) return "";
+    const s = String(raw).trim();
+    if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^https?:/i.test(s)) return "";
+    return s;
+  }
+  const gameUrl = sanitizeTarget(params.get("url"));
   const title = params.get("title") || "game";
   history.replaceState({}, "", "/game.html");
   document.getElementById("gameTitle").textContent = title;
