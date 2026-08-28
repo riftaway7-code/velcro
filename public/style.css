@@ -441,13 +441,30 @@ footer {
   .search-input { width: 140px; }
 }
 
+:root.embed[data-theme] {
+  --bg: #1c1418;
+  --bg-elevated: #2a1f24;
+  --bg-elevated-hover: #33262f;
+  --accent: #e0824a;
+  --accent-bright: #eb9560;
+  --accent-glow: rgba(224, 130, 74, 0.30);
+  --accent-soft: #3a2a2f;
+  --text: #e6d3c6;
+  --text-muted: #a98d80;
+  --border: rgba(232, 200, 180, 0.14);
+  --shadow: rgba(0, 0, 0, 0.45);
+  --icon-color: #e0824a;
+  --cat-color: #e0824a;
+  --filter-bg: #2a1f24;
+  --filter-text: #e6d3c6;
+  --filter-border: rgba(232, 200, 180, 0.14);
+}
+
+html.embed body { background: var(--bg); }
 html.embed .site-nav { display: none; }
+html.embed .hero { display: none; }
 html.embed .topbar { border-bottom: 0; }
-html.embed main { padding-top: 14px; }
-html.embed .hero { margin: 2px 0 18px; }
-html.embed .hero h1 { font-size: 30px; }
-html.embed .hero .tagline,
-html.embed .hero .user-stats { display: none; }
+html.embed main { padding-top: 16px; }
 html.embed .games-grid,
 html.embed .games-row .games-grid {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

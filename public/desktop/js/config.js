@@ -1,7 +1,7 @@
 let dtz = "UTC";
 try { dtz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) {}
 
-const DEFAULTS = { user: "apollo", host: "archlinux", tz: dtz, setup: true };
+const DEFAULTS = { user: "velcro", host: "archlinux", tz: dtz, setup: true };
 
 let loaded;
 try {
