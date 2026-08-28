@@ -184,4 +184,10 @@
 
   window.VelcroTheme = VelcroTheme;
   VelcroTheme.apply();
+
+  try {
+    if (new URLSearchParams(window.location.search).has("embed")) {
+      document.documentElement.classList.add("embed");
+    }
+  } catch (e) {}
 })();

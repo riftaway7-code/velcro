@@ -440,3 +440,19 @@ footer {
   .topbar { justify-content: center; }
   .search-input { width: 140px; }
 }
+
+html.embed .site-nav { display: none; }
+html.embed .topbar { border-bottom: 0; }
+html.embed main { padding-top: 14px; }
+html.embed .hero { margin: 2px 0 18px; }
+html.embed .hero h1 { font-size: 30px; }
+html.embed .hero .tagline,
+html.embed .hero .user-stats { display: none; }
+html.embed .games-grid,
+html.embed .games-row .games-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+html.embed .game-card { border-radius: 26px; }
+html.embed .game-card .name { font-size: 19px; }
+html.embed .game-card .info { padding: 14px 16px 18px; }

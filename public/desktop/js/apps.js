@@ -119,7 +119,7 @@ export function buildEmbed(src, opts) {
   const frame = root.querySelector("iframe");
   frame.setAttribute("allow", "fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media");
   if (opts && opts.sandbox) frame.setAttribute("sandbox", opts.sandbox);
-  frame.src = src;
+  frame.src = src + (src.includes("?") ? "&" : "?") + "embed=1";
   return root;
 }
 
