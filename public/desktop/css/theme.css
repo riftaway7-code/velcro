@@ -1,0 +1,41 @@
+:root {
+  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --sky-top: #b5643a;
+  --sky-mid: #bd7853;
+  --sky-low: #b0716b;
+  --wp-sun: #edb07a;
+  --wp-mtn-far: #6d5a6b;
+  --wp-mtn-mid: #97625a;
+  --wp-water: #b17d77;
+  --wp-tree: #7c4f54;
+  --wp-goose: #3a2a2f;
+
+  --bar-bg: rgba(30, 21, 25, 0.9);
+  --bar-fg: #dcc6ba;
+  --bar-fg-dim: #9c8078;
+  --bar-accent: #e0824a;
+  --bar-active-bg: rgba(224, 130, 74, 0.22);
+  --bar-pill-bg: rgba(255, 255, 255, 0.06);
+  --bar-border: rgba(232, 200, 180, 0.1);
+
+  --win-bg: rgba(28, 20, 24, 0.84);
+  --win-fg: #e6d3c6;
+  --win-border: rgba(232, 200, 180, 0.14);
+  --win-radius: 12px;
+  --win-shadow: 0 24px 60px -22px rgba(0, 0, 0, 0.62);
+
+  --term-fg: #e6d3c6;
+  --term-dim: #a98d80;
+  --term-accent: #e0824a;
+  --term-pink: #cd7a95;
+  --term-purple: #8f6ca0;
+  --term-cursor: #e0824a;
+  --term-sel: rgba(224, 130, 74, 0.3);
+
+  --card-bg: #2a1f24;
+  --card-fg: #e6d3c6;
+  --card-dim: #a98d80;
+  --accent: #e08a6a;
+  --accent-2: #cd7a95;
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>velcro</title>
+<script src="/theme.js"></script>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<script src="/cloak.js"></script>
+
+<header class="topbar">
+  <button id="scrollTop" class="scroll-top" type="button" aria-label="Scroll to top">
+    <span class="material-symbols-rounded">arrow_upward</span>
+  </button>
+  <div class="topbar-right">
+    <div class="search-wrapper">
+      <span class="material-symbols-rounded search-icon">search</span>
+      <input id="searchInput" class="search-input" type="text" placeholder="saerch" autocomplete="off" />
+    </div>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+      <span class="material-symbols-rounded">dark_mode</span>
+    </button>
+  </div>
+</header>
+
+<nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
+  <a href="/home.html" class="active"><span class="material-symbols-rounded">sports_esports</span>games</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
+  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
+  <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
+  <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
+  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
+</nav>
+
+<main>
+  <section class="hero">
+    <h1>velcro</h1>
+    <p class="tagline"><span id="typingText"></span><span class="caret" aria-hidden="true"></span></p>
+    <div class="user-stats" id="userStats">
+      <span class="user-stat"><span class="user-dot"></span><span id="activeUsersLine">&hellip; online</span></span>
+      <span class="user-stat"><span id="totalUsersLine">&hellip; total</span></span>
+    </div>
+  </section>
+
+  <section class="games-row" id="recentSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">history</span>recently played</h2>
+    <div class="games-grid" id="recentGrid"></div>
+  </section>
+
+  <section class="games-row" id="topSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">trending_up</span>top played</h2>
+    <div class="games-grid" id="topGrid"></div>
+  </section>
+
+  <section class="controls">
+    <div class="category-pills" id="categoryPills">
+      <button class="pill active" data-category="all">all</button>
+    </div>
+  </section>
+
+  <section class="games-grid" id="gamesGrid">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>loading games&hellip;</p>
+    </div>
+  </section>
+
+  <p class="empty-state" id="emptyState" hidden>nothing matches that &mdash; try a different search</p>
+</main>
+
+<footer>
+  <p>velcro</p>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
