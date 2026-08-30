@@ -147,7 +147,7 @@ export function makeTerminal(openApp) {
     neofetch() { fastfetch(); },
     fastfetch() { fastfetch(); },
     open(args) {
-      const known = ["terminal", "files", "editor", "browser", "chat", "settings", "music", "games", "moves", "applications"];
+      const known = ["terminal", "files", "editor", "browser", "chat", "settings", "games", "moves", "applications"];
       if (!known.includes(args[0])) { line("open: unknown app. try: " + known.join(", "), "t-dim"); return; }
       openApp(args[0]);
       line("launching " + args[0] + "...", "t-dim");

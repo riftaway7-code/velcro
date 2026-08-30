@@ -140,7 +140,6 @@ export function buildBrowser(openApp) {
         <button data-a="files">files</button>
         <button data-a="editor">editor</button>
         <button data-a="chat">chat</button>
-        <button data-a="music">music</button>
         <button data-a="settings">settings</button>
       </div>
     </div>`));
@@ -156,40 +155,6 @@ export function buildBrowser(openApp) {
   return root;
 }
 
-export function buildMusic(onLoad) {
-  const root = h(`<div class="mp4">
-    <video class="mp4-video" controls playsinline></video>
-    <div class="mp4-bar">
-      <button class="mp4-open"><span class="msym">folder_open</span> open mp4</button>
-      <span class="mp4-name">drop an mp4 here or open one</span>
-      <input class="mp4-input" type="file" accept="video/mp4,video/*" hidden>
-    </div>
-  </div>`);
-  const video = root.querySelector(".mp4-video");
-  const input = root.querySelector(".mp4-input");
-  const name = root.querySelector(".mp4-name");
-
-  function load(file) {
-    if (!file) return;
-    if (video.src) URL.revokeObjectURL(video.src);
-    video.src = URL.createObjectURL(file);
-    name.textContent = file.name;
-    video.play().catch(() => {});
-    if (typeof onLoad === "function") onLoad(video, file.name);
-  }
-
-  root.querySelector(".mp4-open").onclick = () => input.click();
-  input.onchange = () => load(input.files[0]);
-  root.addEventListener("dragover", e => { e.preventDefault(); root.classList.add("drop"); });
-  root.addEventListener("dragleave", () => root.classList.remove("drop"));
-  root.addEventListener("drop", e => {
-    e.preventDefault();
-    root.classList.remove("drop");
-    load(e.dataTransfer.files[0]);
-  });
-  return root;
-}
-
 export function buildApplications(open) {
   const items = [
     ["terminal", "terminal", "terminal"],
@@ -197,7 +162,6 @@ export function buildApplications(open) {
     ["editor", "code", "editor"],
     ["browser", "public", "browser"],
     ["chat", "chat_bubble", "chat"],
-    ["music", "music_note", "music"],
     ["games", "sports_esports", "games"],
     ["moves", "open_with", "moves"],
     ["settings", "settings", "settings"]

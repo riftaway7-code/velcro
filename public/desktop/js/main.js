@@ -1,14 +1,12 @@
 import { createWindow } from "./wm.js";
 import { makeTerminal } from "./terminal.js";
-import { buildFiles, buildEditor, buildChat, buildBrowser, buildMusic, buildSettings, buildApplications, buildGames, buildEmbed } from "./apps.js";
-import { initNowPlaying } from "./nowplaying.js";
+import { buildFiles, buildEditor, buildChat, buildBrowser, buildSettings, buildApplications, buildGames, buildEmbed } from "./apps.js";
 import { restoreTheme } from "./theme.js";
 import { config, saveConfig } from "./config.js";
 import { runSetup } from "./setup.js";
 import { zoneFor } from "./zones.js";
 
 restoreTheme();
-const np = initNowPlaying();
 
 function clock() {
   const el = document.getElementById("clock");
@@ -68,9 +66,6 @@ function openApp(name) {
     case "vapps":
       createWindow({ id: "vapps", title: "apps", width: 940, height: 640, body: buildEmbed("/apps.html") });
       break;
-    case "music":
-      createWindow({ id: "music", title: "music — mp4 player", width: 480, height: 360, body: buildMusic((v, n) => np.bindVideo(v, n)) });
-      break;
     case "settings":
       createWindow({ id: "settings", title: "settings", width: 440, height: 560, body: buildSettings(relaunchSetup) });
       break;
@@ -105,8 +100,6 @@ document.querySelectorAll("[data-app]").forEach(b => {
 });
 
 document.getElementById("tray-gear").addEventListener("click", () => openApp("settings"));
-document.getElementById("tray-anko").addEventListener("click", () => np.toggle());
-document.getElementById("clock").addEventListener("click", () => openApp("music"));
 
 const bell = document.getElementById("tray-bell");
 bell.addEventListener("click", () => {
@@ -118,7 +111,7 @@ bell.addEventListener("click", () => {
 const KICKOFF = [
   ["web", "public"], ["games", "sports_esports"], ["movies", "movie"],
   ["vapps", "apps"], ["terminal", "terminal"], ["files", "folder"],
-  ["music", "music_note"], ["settings", "settings"]
+  ["settings", "settings"]
 ];
 document.getElementById("plasma").addEventListener("click", e => {
   const ctx = document.getElementById("ctx");
@@ -153,7 +146,7 @@ pinDefs.forEach(([app, icon, a, b]) => {
 });
 
 const ctx = document.getElementById("ctx");
-const CTX_APPS = ["web", "games", "movies", "vapps", "terminal", "files", "music", "settings"];
+const CTX_APPS = ["web", "games", "movies", "vapps", "terminal", "files", "settings"];
 document.getElementById("desktop").addEventListener("contextmenu", e => {
   e.preventDefault();
   ctx.replaceChildren();
@@ -176,28 +169,22 @@ document.addEventListener("pointerdown", e => {
 });
 
 function relaunchSetup() {
-  const np = document.getElementById("nowplaying");
-  const npWasHidden = np.hidden;
-  np.hidden = true;
   runSetup(() => {
     config.setup = true;
     saveConfig();
     clock();
     weather();
-    np.hidden = npWasHidden;
   });
 }
 
 if (config.setup) {
   openApp("web");
 } else {
-  document.getElementById("nowplaying").hidden = true;
   runSetup(() => {
     config.setup = true;
     saveConfig();
     clock();
     weather();
-    document.getElementById("nowplaying").hidden = false;
     openApp("web");
   });
 }
