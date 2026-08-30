@@ -114,6 +114,65 @@ export function buildChat() {
   return root;
 }
 
+export function buildAssistant() {
+  const root = h(`<div class="chat">
+    <div class="chat-log"></div>
+    <form class="chat-in"><input placeholder="ask anything" spellcheck="false" autocomplete="off"><button type="submit">send</button></form>
+  </div>`);
+  const log = root.querySelector(".chat-log");
+  const form = root.querySelector("form");
+  const input = form.querySelector("input");
+
+  const history = [
+    { role: "system", content: "You are a concise, helpful assistant embedded in a web desktop. Give direct answers. Use short paragraphs and code blocks where useful." }
+  ];
+
+  function add(who, text, cls) {
+    const m = h(`<div class="msg"><span class="who"></span><span class="body"></span></div>`);
+    m.classList.add(who === "you" ? "me" : "them");
+    if (cls) m.classList.add(cls);
+    m.querySelector(".who").textContent = who;
+    m.querySelector(".body").textContent = text;
+    log.appendChild(m);
+    log.scrollTop = log.scrollHeight;
+    return m.querySelector(".body");
+  }
+
+  add("assistant", "hey. what do you need?");
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const v = input.value.trim();
+    if (!v) return;
+    add("you", v);
+    input.value = "";
+    input.disabled = true;
+    history.push({ role: "user", content: v });
+    const body = add("assistant", "…", "pending");
+    try {
+      const res = await fetch("https://text.pollinations.ai/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "openai", messages: history.slice(-14) })
+      });
+      if (!res.ok) throw new Error("http " + res.status);
+      const data = await res.json();
+      const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || "").trim()
+        || (typeof data === "string" ? data : "");
+      body.textContent = reply || "no answer came back. try again.";
+      body.parentElement.classList.remove("pending");
+      if (reply) history.push({ role: "assistant", content: reply });
+    } catch (err) {
+      body.textContent = "couldn't reach the model (" + err.message + "). the endpoint may be blocked on this network.";
+      body.parentElement.classList.remove("pending");
+    } finally {
+      input.disabled = false;
+      input.focus();
+    }
+  });
+  return root;
+}
+
 export function buildEmbed(src, opts) {
   const root = h(`<div class="embed"><iframe class="embed-frame" referrerpolicy="no-referrer"></iframe></div>`);
   const frame = root.querySelector("iframe");
@@ -162,6 +221,7 @@ export function buildApplications(open) {
     ["editor", "code", "editor"],
     ["browser", "public", "browser"],
     ["chat", "chat_bubble", "chat"],
+    ["assistant", "smart_toy", "assistant"],
     ["games", "sports_esports", "games"],
     ["moves", "open_with", "moves"],
     ["settings", "settings", "settings"]

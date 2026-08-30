@@ -1,6 +1,6 @@
 import { createWindow } from "./wm.js";
 import { makeTerminal } from "./terminal.js";
-import { buildFiles, buildEditor, buildChat, buildBrowser, buildSettings, buildApplications, buildGames, buildEmbed } from "./apps.js";
+import { buildFiles, buildEditor, buildChat, buildBrowser, buildSettings, buildApplications, buildGames, buildEmbed, buildAssistant } from "./apps.js";
 import { restoreTheme } from "./theme.js";
 import { config, saveConfig } from "./config.js";
 import { runSetup } from "./setup.js";
@@ -66,6 +66,9 @@ function openApp(name) {
     case "vapps":
       createWindow({ id: "vapps", title: "apps", width: 940, height: 640, body: buildEmbed("/apps.html") });
       break;
+    case "assistant":
+      createWindow({ id: "assistant", title: "assistant", width: 460, height: 560, body: buildAssistant() });
+      break;
     case "settings":
       createWindow({ id: "settings", title: "settings", width: 440, height: 560, body: buildSettings(relaunchSetup) });
       break;
@@ -110,7 +113,7 @@ bell.addEventListener("click", () => {
 
 const KICKOFF = [
   ["web", "public"], ["games", "sports_esports"], ["movies", "movie"],
-  ["vapps", "apps"], ["terminal", "terminal"], ["files", "folder"],
+  ["vapps", "apps"], ["assistant", "smart_toy"], ["terminal", "terminal"], ["files", "folder"],
   ["settings", "settings"]
 ];
 document.getElementById("plasma").addEventListener("click", e => {
@@ -146,7 +149,7 @@ pinDefs.forEach(([app, icon, a, b]) => {
 });
 
 const ctx = document.getElementById("ctx");
-const CTX_APPS = ["web", "games", "movies", "vapps", "terminal", "files", "settings"];
+const CTX_APPS = ["web", "games", "movies", "vapps", "assistant", "terminal", "files", "settings"];
 document.getElementById("desktop").addEventListener("contextmenu", e => {
   e.preventDefault();
   ctx.replaceChildren();
