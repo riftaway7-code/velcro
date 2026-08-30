@@ -2,8 +2,20 @@
   var PRESETS = [
     { label: "google classroom", title: "Classes", favicon: "https://ssl.gstatic.com/classroom/favicon.png" },
     { label: "google drive", title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+    { label: "google docs", title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
     { label: "gmail", title: "Inbox", favicon: "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" },
     { label: "powerschool", title: "PowerSchool Learning", favicon: "https://www.powerschool.com/favicon.ico" },
+    { label: "canvas", title: "Dashboard", favicon: "https://canvas.instructure.com/favicon.ico" },
+    { label: "schoology", title: "Home | Schoology", favicon: "https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico" },
+    { label: "clever", title: "Clever | Portal", favicon: "https://clever.com/favicon.ico" },
+    { label: "classlink", title: "My Apps", favicon: "https://launchpad.classlink.com/favicon.ico" },
+    { label: "khan academy", title: "Dashboard | Khan Academy", favicon: "https://cdn.kastatic.org/images/favicon.ico" },
+    { label: "ixl", title: "IXL | Learn", favicon: "https://www.ixl.com/favicon.ico" },
+    { label: "desmos", title: "Desmos | Graphing Calculator", favicon: "https://www.desmos.com/favicon.ico" },
+    { label: "quizlet", title: "Quizlet", favicon: "https://quizlet.com/favicon.ico" },
+    { label: "nearpod", title: "Nearpod", favicon: "https://nearpod.com/favicon.ico" },
+    { label: "wikipedia", title: "Wikipedia", favicon: "https://en.wikipedia.org/static/favicon/wikipedia.ico" },
+    { label: "dictionary", title: "Dictionary.com", favicon: "https://www.dictionary.com/favicon.ico" },
     { label: "none", title: "", favicon: "" },
   ];
 
@@ -127,6 +139,8 @@
     btn.addEventListener("click", function () {
       titleInput.value = p.title;
       faviconInput.value = p.favicon;
+      if (p.title || p.favicon) window.VelcroCloak.save(p.title, p.favicon);
+      else window.VelcroCloak.clear();
     });
     presetRow.appendChild(btn);
   });
