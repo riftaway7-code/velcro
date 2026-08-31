@@ -51,6 +51,11 @@
     </div>
   </section>
 
+  <section class="games-row" id="favSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">star</span>favorites</h2>
+    <div class="games-grid" id="favGrid"></div>
+  </section>
+
   <section class="games-row" id="recentSection" hidden>
     <h2 class="row-title"><span class="material-symbols-rounded">history</span>recently played</h2>
     <div class="games-grid" id="recentGrid"></div>
@@ -64,6 +69,10 @@
   <section class="controls">
     <div class="category-pills" id="categoryPills">
       <button class="pill active" data-category="all">all</button>
+    </div>
+    <div class="controls-right">
+      <span class="game-count" id="gameCount"></span>
+      <button class="pill" id="randomGame" type="button" title="Open a random game"><span class="material-symbols-rounded">casino</span>random</button>
     </div>
   </section>
 

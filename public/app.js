@@ -9,6 +9,10 @@
   var recentGrid = document.getElementById("recentGrid");
   var topSection = document.getElementById("topSection");
   var topGrid = document.getElementById("topGrid");
+  var favSection = document.getElementById("favSection");
+  var favGrid = document.getElementById("favGrid");
+  var gameCountEl = document.getElementById("gameCount");
+  var randomBtn = document.getElementById("randomGame");
 
   scrollTopBtn.addEventListener("click", function () {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -36,6 +40,32 @@
 
   var RECENT_KEY = "velcro_recent_games";
   var PLAY_COUNTS_KEY = "velcro_play_counts";
+  var FAV_KEY = "velcro_fav_games";
+
+  function readJSON(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || fallback); } catch (e) { return JSON.parse(fallback); }
+  }
+  function getFavs() { return readJSON(FAV_KEY, "[]"); }
+  function isFav(id) { return getFavs().indexOf(id) !== -1; }
+  function toggleFav(id) {
+    var favs = getFavs();
+    var i = favs.indexOf(id);
+    if (i === -1) favs.push(id); else favs.splice(i, 1);
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) {}
+    renderFavorites();
+  }
+
+  function reportBroken(g, btn) {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = "reported";
+    fetch("/api/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: g.id, title: g.title, url: g.url }),
+      keepalive: true
+    }).catch(function () {});
+  }
 
   function recordPlay(id) {
     try {
@@ -83,6 +113,32 @@
     info.appendChild(cat);
     a.appendChild(cover);
     a.appendChild(info);
+
+    var star = document.createElement("button");
+    star.type = "button";
+    star.className = "card-fav" + (isFav(g.id) ? " on" : "");
+    star.title = "Favorite";
+    star.setAttribute("aria-label", "Toggle favorite");
+    star.innerHTML = '<span class="material-symbols-rounded">star</span>';
+    star.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFav(g.id);
+      star.classList.toggle("on");
+    });
+    a.appendChild(star);
+
+    var report = document.createElement("button");
+    report.type = "button";
+    report.className = "card-report";
+    report.textContent = "report broken";
+    report.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      reportBroken(g, report);
+    });
+    a.appendChild(report);
+
     return a;
   }
 
@@ -100,6 +156,23 @@
     var frag = document.createDocumentFragment();
     filtered.forEach(function (g) { frag.appendChild(buildCard(g)); });
     gridEl.appendChild(frag);
+
+    lastFiltered = filtered;
+    if (gameCountEl) {
+      gameCountEl.textContent = filtered.length === games.length
+        ? games.length + " games"
+        : filtered.length + " of " + games.length;
+    }
+  }
+
+  var lastFiltered = [];
+
+  function renderFavorites() {
+    var favIds = getFavs();
+    var list = favIds
+      .map(function (id) { return games.find(function (g) { return g.id === id; }); })
+      .filter(Boolean);
+    renderRow(favSection, favGrid, list);
   }
 
   function renderRow(section, grid, list) {
@@ -154,12 +227,39 @@
 
   searchInput.addEventListener("input", renderGrid);
 
+  if (randomBtn) {
+    randomBtn.addEventListener("click", function () {
+      var pool = lastFiltered.length ? lastFiltered : games;
+      if (!pool.length) return;
+      var g = pool[Math.floor(Math.random() * pool.length)];
+      var url = "/game.html?url=" + encodeURIComponent(g.url) + "&title=" + encodeURIComponent(g.title);
+      recordPlay(g.id);
+      if (localStorage.getItem("velcro_launch_mode") === "about-blank") openAboutBlank(url);
+      else window.location.href = url;
+    });
+  }
+
+  gridEl.addEventListener("keydown", function (e) {
+    if (["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].indexOf(e.key) === -1) return;
+    var cards = Array.prototype.slice.call(gridEl.querySelectorAll(".game-card"));
+    var idx = cards.indexOf(document.activeElement);
+    if (idx === -1) { if (cards[0]) cards[0].focus(); e.preventDefault(); return; }
+    var perRow = Math.max(1, Math.round(gridEl.clientWidth / cards[0].offsetWidth));
+    var next = idx;
+    if (e.key === "ArrowRight") next = idx + 1;
+    else if (e.key === "ArrowLeft") next = idx - 1;
+    else if (e.key === "ArrowDown") next = idx + perRow;
+    else if (e.key === "ArrowUp") next = idx - perRow;
+    if (cards[next]) { cards[next].focus(); e.preventDefault(); }
+  });
+
   fetch("/games.json")
     .then(function (res) { return res.json(); })
     .then(function (data) {
       games = data;
       buildPills();
       renderGrid();
+      renderFavorites();
       renderRecent();
       renderTop();
     })

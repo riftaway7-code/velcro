@@ -374,6 +374,7 @@ main {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .game-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--bg-elevated);
@@ -385,6 +386,56 @@ main {
   box-shadow: 0 6px 16px var(--shadow);
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
 }
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.game-count { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+#randomGame { display: inline-flex; align-items: center; gap: 6px; }
+#randomGame .material-symbols-rounded { font-size: 18px; }
+
+.card-fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.card-fav .material-symbols-rounded { font-size: 18px; }
+.game-card:hover .card-fav, .card-fav:focus-visible { opacity: 1; }
+.card-fav.on { opacity: 1; color: #ffd34d; }
+.card-fav:hover { transform: scale(1.12); }
+
+.card-report {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.game-card:hover .card-report, .card-report:focus-visible { opacity: 1; }
+.card-report:disabled { opacity: 1; background: var(--accent); cursor: default; }
 
 .game-card:hover, .game-card:focus-visible {
   transform: translateY(-6px) rotate(-0.5deg);

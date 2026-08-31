@@ -50,6 +50,31 @@ app.get("/api/stats/users", (_, res) => {
   res.json({ ok: true, totalUsers, activeUsers: presenceMap.size });
 });
 
+const reportCounts = new Map();
+const REPORT_WEBHOOK = process.env.REPORT_WEBHOOK || "";
+setInterval(() => reportCounts.clear(), 10 * 60 * 1000);
+
+app.post("/api/report", (req, res) => {
+  const id = String(req.body?.id || "").slice(0, 120);
+  const title = String(req.body?.title || "").slice(0, 200);
+  const url = String(req.body?.url || "").slice(0, 500);
+  if (!id && !title) return res.status(400).json({ ok: false });
+  const key = id || title;
+  const n = (reportCounts.get(key) || 0) + 1;
+  reportCounts.set(key, n);
+  if (n <= 5) {
+    console.log(`[report] broken game: ${title || id} ${url}`);
+    if (REPORT_WEBHOOK) {
+      fetch(REPORT_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `broken game reported: **${title || id}** ${url}` })
+      }).catch(() => {});
+    }
+  }
+  res.json({ ok: true });
+});
+
 function v4ToInt(ip) {
   const p = ip.split(".");
   return ((+p[0] << 24) >>> 0) + (+p[1] << 16) + (+p[2] << 8) + +p[3];
