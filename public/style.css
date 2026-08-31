@@ -524,3 +524,33 @@ html.embed .games-row .games-grid {
 html.embed .game-card { border-radius: 26px; }
 html.embed .game-card .name { font-size: 19px; }
 html.embed .game-card .info { padding: 14px 16px 18px; }
+
+/* accessibility settings */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+html.high-contrast {
+  --border: #000000;
+  --text: #000000;
+  --text-muted: #1a1a1a;
+  --bg: #ffffff;
+  --bg-elevated: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.55);
+}
+html.high-contrast[data-theme="dark"],
+html.high-contrast[data-theme="midnight"] {
+  --border: #ffffff;
+  --text: #ffffff;
+  --text-muted: #e6e6e6;
+  --bg: #000000;
+  --bg-elevated: #000000;
+  --shadow: rgba(0, 0, 0, 0.9);
+}
+html.high-contrast .game-card,
+html.high-contrast .pill,
+html.high-contrast .settings-group { border-width: 2px; }

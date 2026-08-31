@@ -372,6 +372,21 @@
   </section>
 
   <section class="settings-section">
+    <h2>accessibility</h2>
+    <p class="settings-hint">reduced motion also turns on automatically if your system asks for it.</p>
+    <div class="settings-group">
+      <div class="launch-row">
+        <p>reduce motion &mdash; cut animations and transitions</p>
+        <div class="switch" id="reduceMotionSwitch"><div class="knob"></div></div>
+      </div>
+      <div class="launch-row" style="margin-top: 16px;">
+        <p>high contrast &mdash; stronger text/background separation</p>
+        <div class="switch" id="highContrastSwitch"><div class="knob"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
     <h2>panic key</h2>
     <p class="settings-hint">press this key anywhere on velcro to jump straight to a decoy page. not while typing in a box.</p>
     <div class="settings-group">
@@ -424,6 +439,7 @@
 
 <script src="/cloak.js"></script>
 <script src="/panic.js"></script>
+<script src="/a11y.js"></script>
 <script src="/settings.js"></script>
 </body>
 </html>

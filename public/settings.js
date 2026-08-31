@@ -155,6 +155,27 @@
     faviconInput.value = "";
   });
 
+  var rmSwitch = document.getElementById("reduceMotionSwitch");
+  var hcSwitch = document.getElementById("highContrastSwitch");
+  if (rmSwitch && window.VelcroA11y) {
+    function paintA11y() {
+      var s = window.VelcroA11y.get();
+      rmSwitch.classList.toggle("on", s.reduceMotion);
+      hcSwitch.classList.toggle("on", s.highContrast);
+    }
+    paintA11y();
+    rmSwitch.addEventListener("click", function () {
+      var s = window.VelcroA11y.get();
+      window.VelcroA11y.set(!s.reduceMotion, s.highContrast);
+      paintA11y();
+    });
+    hcSwitch.addEventListener("click", function () {
+      var s = window.VelcroA11y.get();
+      window.VelcroA11y.set(s.reduceMotion, !s.highContrast);
+      paintA11y();
+    });
+  }
+
   var panicKeyInput = document.getElementById("panicKey");
   var panicUrlInput = document.getElementById("panicUrl");
   if (panicKeyInput && window.VelcroPanic) {
