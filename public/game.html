@@ -168,6 +168,10 @@
   const frame = document.getElementById("gameFrame");
   frame.addEventListener("load", () => { if (frame.src) setTimeout(hideLoader, 250); });
 
+  // same-origin games (self-contained loaders under /games/) run directly,
+  // not through the proxy.
+  const isLocal = gameUrl && (gameUrl.startsWith("/") || gameUrl.startsWith(location.origin + "/"));
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement("script");
@@ -241,6 +245,7 @@
   }
 
   async function init() {
+    if (isLocal) { frame.src = gameUrl; return; }
     const engine = localStorage.getItem("velcro_proxy_engine") || "scramjet";
     if (engine === "uv") return initUv();
     return initScramjet();

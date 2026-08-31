@@ -1,5 +1,12 @@
 [
   {
+    "id": "plague-inc-evolved",
+    "title": "Plague Inc: Evolved",
+    "url": "/games/plague-inc-evolved.html",
+    "thumbnail": "https://cdn.cloudflare.steamstatic.com/steam/apps/246620/header.jpg",
+    "category": "Simulation"
+  },
+  {
     "id": "dunjunz",
     "title": "Dunjunz",
     "url": "https://www.dunjunz.com/",
