@@ -370,6 +370,25 @@
   </section>
 
   <section class="settings-section">
+    <h2>panic key</h2>
+    <p class="settings-hint">press this key anywhere on velcro to jump straight to a decoy page. not while typing in a box.</p>
+    <div class="settings-group">
+      <div class="settings-field">
+        <label>key</label>
+        <input type="text" id="panicKey" maxlength="1" placeholder="`" />
+      </div>
+      <div class="settings-field">
+        <label>decoy url</label>
+        <input type="text" id="panicUrl" placeholder="https://classroom.google.com/" />
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn" id="panicSave">save</button>
+        <button class="settings-btn ghost" id="panicReset">reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
     <h2>launch mode</h2>
     <p class="settings-hint">how games open when you click them.</p>
     <div class="settings-group">
@@ -402,6 +421,7 @@
 </main>
 
 <script src="/cloak.js"></script>
+<script src="/panic.js"></script>
 <script src="/settings.js"></script>
 </body>
 </html>

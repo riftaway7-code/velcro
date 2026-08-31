@@ -155,6 +155,26 @@
     faviconInput.value = "";
   });
 
+  var panicKeyInput = document.getElementById("panicKey");
+  var panicUrlInput = document.getElementById("panicUrl");
+  if (panicKeyInput && window.VelcroPanic) {
+    var pc = window.VelcroPanic.get();
+    panicKeyInput.value = pc.key;
+    panicUrlInput.value = pc.url;
+    document.getElementById("panicSave").addEventListener("click", function () {
+      window.VelcroPanic.save(panicKeyInput.value.slice(0, 1), panicUrlInput.value.trim());
+      var now = window.VelcroPanic.get();
+      panicKeyInput.value = now.key;
+      panicUrlInput.value = now.url;
+    });
+    document.getElementById("panicReset").addEventListener("click", function () {
+      window.VelcroPanic.clear();
+      var d = window.VelcroPanic.get();
+      panicKeyInput.value = d.key;
+      panicUrlInput.value = d.url;
+    });
+  }
+
   var LAUNCH_KEY = "velcro_launch_mode";
   var launchSwitch = document.getElementById("launchSwitch");
 
