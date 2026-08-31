@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>apps — velcro</title>
+<title>search — velcro</title>
 <script src="/theme.js"></script>
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,49 +23,43 @@
   <div class="topbar-right" style="margin-left: auto;">
     <div class="search-wrapper">
       <span class="material-symbols-rounded search-icon">search</span>
-      <input id="searchInput" class="search-input" type="text" placeholder="search" autocomplete="off" />
+      <input id="searchInput" class="search-input" type="text" placeholder="search everything" autocomplete="off" autofocus />
     </div>
   </div>
 </header>
 
 <nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
   <a href="/"><span class="material-symbols-rounded">sports_esports</span>games</a>
-  <a href="/apps.html" class="active"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
   <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
   <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
   <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
   <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
   <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
-    <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
-<a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
+  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
 </nav>
 
 <main>
   <section class="hero">
-    <h1>apps</h1>
-    <p class="tagline">other useful sites, tunneled the same way</p>
+    <h1>search</h1>
+    <p class="tagline">games and apps, one box</p>
   </section>
 
-  <section class="controls">
-    <div class="category-pills" id="categoryPills">
-      <button class="pill active" data-category="all">all</button>
-    </div>
+  <section class="games-row" id="gamesResult" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">sports_esports</span>games</h2>
+    <div class="games-grid" id="gamesGrid"></div>
   </section>
 
-  <section class="games-grid" id="gamesGrid">
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>loading apps&hellip;</p>
-    </div>
+  <section class="games-row" id="appsResult" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">apps</span>apps</h2>
+    <div class="games-grid" id="appsGrid"></div>
   </section>
 
-  <p class="empty-state" id="emptyState" hidden>nothing matches that &mdash; try a different search</p>
+  <p class="empty-state" id="emptyState">type to search across games and apps</p>
 </main>
 
-<footer>
-  <p>velcro</p>
-</footer>
+<footer><p>velcro</p></footer>
 
-<script src="/apps.js"></script>
+<script src="/search.js"></script>
 </body>
 </html>
