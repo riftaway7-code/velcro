@@ -68,6 +68,35 @@
     display: block;
     background: #000;
   }
+
+  .game-loader {
+    position: fixed;
+    inset: 60px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--bg, #0b0b0b);
+    color: var(--text, #fff);
+    z-index: 5;
+    transition: opacity 0.35s ease;
+  }
+  .game-loader.gone { opacity: 0; pointer-events: none; }
+  .game-loader .spinner {
+    width: 34px; height: 34px;
+    border: 4px solid var(--border, #333);
+    border-top-color: var(--accent, #4caf50);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .game-loader .gl-title { font-family: var(--font-display, sans-serif); font-weight: 700; font-size: 16px; }
+  .game-loader .gl-hint { font-size: 12px; color: var(--text-muted, #999); }
+  .game-loader button {
+    margin-top: 4px; padding: 6px 14px; border-radius: 999px; border: none;
+    background: var(--accent, #4caf50); color: #fff; font-weight: 700; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -93,9 +122,28 @@
 
 <iframe id="gameFrame" class="cover-viewport" allowfullscreen></iframe>
 
+<div class="game-loader" id="gameLoader">
+  <div class="spinner"></div>
+  <div class="gl-title" id="glTitle">loading&hellip;</div>
+  <div class="gl-hint">booting the proxy and the game</div>
+  <button id="glDismiss" type="button" hidden>still loading &mdash; show anyway</button>
+</div>
+
 <script src="/cloak.js"></script>
 <script type="module">
   const params = new URLSearchParams(location.search);
+  const loaderEl = document.getElementById("gameLoader");
+  const glDismiss = document.getElementById("glDismiss");
+  let loaderHidden = false;
+  function hideLoader() {
+    if (loaderHidden) return;
+    loaderHidden = true;
+    loaderEl.classList.add("gone");
+    setTimeout(() => loaderEl.remove(), 400);
+  }
+  glDismiss.addEventListener("click", hideLoader);
+  setTimeout(() => { if (!loaderHidden) glDismiss.hidden = false; }, 8000);
+  setTimeout(hideLoader, 45000);
   // url comes from the query string, so a shared link could carry javascript:,
   // data:, etc. The proxy engines are meant to load arbitrary http(s) targets;
   // anything with a non-http(s) scheme is rejected here before it can reach an
@@ -110,11 +158,13 @@
   const title = params.get("title") || "game";
   history.replaceState({}, "", "/game.html");
   document.getElementById("gameTitle").textContent = title;
+  document.getElementById("glTitle").textContent = title;
   document.title = title + " — velcro";
   window.VelcroCloak?.apply();
   document.getElementById("closeBtn").addEventListener("click", () => history.back());
 
   const frame = document.getElementById("gameFrame");
+  frame.addEventListener("load", () => { if (frame.src) setTimeout(hideLoader, 250); });
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {

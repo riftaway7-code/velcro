@@ -88,11 +88,13 @@
 
     a.addEventListener("click", function (e) {
       recordPlay(g.id);
-      if (localStorage.getItem("velcro_launch_mode") === "about-blank") {
+      var forceBlank = e.shiftKey;
+      if (forceBlank || localStorage.getItem("velcro_launch_mode") === "about-blank") {
         e.preventDefault();
         openAboutBlank(gameUrl);
       }
     });
+    a.title = "shift-click to open in an about:blank tab";
 
     var cover = document.createElement("span");
     cover.className = "cover";
