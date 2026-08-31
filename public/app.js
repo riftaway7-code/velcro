@@ -1,4 +1,11 @@
 (function () {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      var hasApp = regs.some(function (r) { return r.active && r.active.scriptURL.indexOf("/app-sw.js") !== -1; });
+      if (!hasApp) navigator.serviceWorker.register("/app-sw.js", { scope: "/" }).catch(function () {});
+    }).catch(function () {});
+  }
+
   var gridEl = document.getElementById("gamesGrid");
   var emptyEl = document.getElementById("emptyState");
   var pillsEl = document.getElementById("categoryPills");
