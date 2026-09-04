@@ -289,7 +289,7 @@
 
   function currentTheme() {
     var saved = localStorage.getItem(THEME_KEY);
-    return saved || "light";
+    return saved || "dark";
   }
 
   function setTheme(theme) {

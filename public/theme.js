@@ -5,6 +5,7 @@
   var CURSOR_KEY = "velcro_cursor";
 
   var CURSORS = {
+    greendot: { label: "green dot", css: "url('/assets/cursor-greendot.png') 3 2, auto", preview: "/assets/cursor-greendot.png" },
     cat: { label: "cat", css: "url('/assets/cursor-cat.png') 32 32, auto", preview: "/assets/cursor-cat.png" },
     "cat-black": { label: "black cat", css: "url('/assets/cursor-cat-black.png') 32 32, auto", preview: "/assets/cursor-cat-black.png" },
     none: { label: "default", css: "auto", preview: null },
@@ -131,7 +132,7 @@
   }
 
   function applyCursor(value) {
-    var choice = CURSORS[value] ? value : "cat";
+    var choice = CURSORS[value] ? value : "greendot";
     document.documentElement.style.setProperty("--custom-cursor", CURSORS[choice].css);
   }
 
@@ -139,7 +140,7 @@
     wallpapers: WALLPAPERS,
     cursors: CURSORS,
     getCursor: function () {
-      return localStorage.getItem(CURSOR_KEY) || "cat";
+      return localStorage.getItem(CURSOR_KEY) || "greendot";
     },
     setCursor: function (value) {
       localStorage.setItem(CURSOR_KEY, value);
@@ -169,7 +170,7 @@
     },
     apply: function () {
       var saved = localStorage.getItem(THEME_KEY);
-      var theme = saved || "light";
+      var theme = saved || "dark";
       document.documentElement.setAttribute("data-theme", theme);
 
       var custom = this.getCustom();

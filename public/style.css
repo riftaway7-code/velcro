@@ -21,22 +21,22 @@
 }
 
 html[data-theme="light"] {
-  --bg: #7151a8;
-  --bg-elevated: #8768ba;
-  --bg-elevated-hover: #7e5db2;
-  --accent: #3ddc7a;
-  --accent-bright: #2bbd63;
-  --accent-glow: rgba(61, 220, 122, 0.32);
-  --accent-soft: #5a3f8a;
-  --text: #fbf8ff;
-  --text-muted: #d9cdee;
-  --border: #9b7fc4;
-  --shadow: rgba(30, 15, 55, 0.35);
-  --icon-color: #000000;
-  --cat-color: #000000;
-  --filter-bg: #000000;
-  --filter-text: #f5f5f5;
-  --filter-border: #000000;
+  --bg: #f4f0fb;
+  --bg-elevated: #ffffff;
+  --bg-elevated-hover: #ece4fa;
+  --accent: #7151a8;
+  --accent-bright: #5d3f92;
+  --accent-glow: rgba(113, 81, 168, 0.22);
+  --accent-soft: #e6ddf7;
+  --text: #251a3d;
+  --text-muted: #6b5d8a;
+  --border: #ddd0f2;
+  --shadow: rgba(80, 60, 130, 0.12);
+  --icon-color: #5d3f92;
+  --cat-color: #5d3f92;
+  --filter-bg: #ffffff;
+  --filter-text: #251a3d;
+  --filter-border: #ddd0f2;
 }
 
 html[data-theme="dark"] {
@@ -68,7 +68,7 @@ body {
   font-family: var(--font-body);
   min-height: 100vh;
   position: relative;
-  cursor: var(--custom-cursor, url('/assets/cursor-cat.png') 32 32, auto);
+  cursor: var(--custom-cursor, url('/assets/cursor-greendot.png') 3 2, auto);
   transition: background 0.25s ease, color 0.25s ease;
 }
 
@@ -78,8 +78,11 @@ body::before {
   inset: 0;
   z-index: -2;
   background-color: var(--bg);
-  background-image: var(--wallpaper-image, none);
-  background-size: cover;
+  background-image:
+    var(--wallpaper-image, none),
+    radial-gradient(1100px 650px at 100% 0%, var(--accent-glow), transparent 60%),
+    radial-gradient(800px 500px at 0% 100%, var(--accent-glow), transparent 65%);
+  background-size: cover, auto, auto;
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -554,3 +557,122 @@ html.high-contrast[data-theme="midnight"] {
 html.high-contrast .game-card,
 html.high-contrast .pill,
 html.high-contrast .settings-group { border-width: 2px; }
+
+#page-transition {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#page-transition.pt-visible {
+  animation: ptFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: all;
+}
+
+#page-transition.pt-out {
+  animation: ptFadeOut 0.38s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes ptFadeIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ptFadeOut {
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.pt-spinner {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent-bright);
+  animation: ptSpin 1.1s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+}
+
+.pt-ring2 {
+  inset: 9px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: var(--accent);
+  border-left-color: var(--accent-bright);
+  animation-duration: 0.8s;
+  animation-direction: reverse;
+}
+
+@keyframes ptSpin { to { transform: rotate(360deg); } }
+
+.pt-msg {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.pt-msg.pt-msg-in {
+  animation: ptMsgFade 0.35s ease;
+}
+
+@keyframes ptMsgFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.click-glow {
+  position: fixed;
+  z-index: 99999;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-bright) 0%, var(--accent) 40%, transparent 72%);
+  box-shadow: 0 0 16px 4px var(--accent-glow);
+  pointer-events: none;
+  animation: clickGlowPulse 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes clickGlowPulse {
+  0%   { transform: scale(0.3); opacity: 0.9; }
+  70%  { opacity: 0.5; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.cloud-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.cloud-badge .material-symbols-rounded { font-size: 16px; }

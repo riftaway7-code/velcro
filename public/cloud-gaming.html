@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>search — velcro</title>
+<title>cloud gaming — velcro</title>
 <script src="/theme.js"></script>
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,6 +12,28 @@
 <link rel="stylesheet" href="/style.css" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <meta name="theme-color" content="#7151a8" />
+<style>
+  .page-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px clamp(16px, 4vw, 48px) 80px;
+  }
+
+  .page-main h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 34px;
+    color: var(--text);
+    margin: 20px 0 8px;
+    text-align: center;
+  }
+
+  .page-main .lede {
+    color: var(--text-muted);
+    margin: 0 0 32px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
 
@@ -21,47 +43,26 @@
 <script src="/click-glow.js"></script>
 <script src="/transitions.js"></script>
 
-<header class="topbar">
-  <div class="topbar-right" style="margin-left: auto;">
-    <div class="search-wrapper">
-      <span class="material-symbols-rounded search-icon">search</span>
-      <input id="searchInput" class="search-input" type="text" placeholder="search everything" autocomplete="off" autofocus />
-    </div>
-  </div>
-</header>
-
-<nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
+<nav class="site-nav" style="justify-content: center; padding: 20px 20px 0;">
   <a href="/"><span class="material-symbols-rounded">sports_esports</span>games</a>
   <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
   <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
-  <a href="/cloud-gaming.html"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
+  <a href="/cloud-gaming.html" class="active"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
+  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
   <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
   <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
   <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
-  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
+    <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
+<a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
 </nav>
 
-<main>
-  <section class="hero">
-    <h1>search</h1>
-    <p class="tagline">games and apps, one box</p>
-  </section>
+<main class="page-main">
+  <h1>cloud gaming</h1>
+  <p class="lede">real android apps, streamed &mdash; not a proxy, an actual cloud instance</p>
 
-  <section class="games-row" id="gamesResult" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">sports_esports</span>games</h2>
-    <div class="games-grid" id="gamesGrid"></div>
-  </section>
-
-  <section class="games-row" id="appsResult" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">apps</span>apps</h2>
-    <div class="games-grid" id="appsGrid"></div>
-  </section>
-
-  <p class="empty-state" id="emptyState">type to search across games and apps</p>
+  <div class="games-grid" id="cloudGrid"></div>
 </main>
 
-<footer><p>velcro</p></footer>
-
-<script src="/search.js"></script>
+<script src="/cloud-gaming.js"></script>
 </body>
 </html>

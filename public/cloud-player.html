@@ -41,7 +41,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 420px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
+
+  .cover-title .material-symbols-rounded { color: var(--accent-bright); font-size: 18px; }
 
   .cover-btn {
     display: flex;
@@ -81,6 +86,8 @@
     color: var(--text, #fff);
     z-index: 5;
     transition: opacity 0.35s ease;
+    text-align: center;
+    padding: 0 24px;
   }
   .game-loader.gone { opacity: 0; pointer-events: none; }
   .game-loader .spinner {
@@ -92,7 +99,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .game-loader .gl-title { font-family: var(--font-display, sans-serif); font-weight: 700; font-size: 16px; }
-  .game-loader .gl-hint { font-size: 12px; color: var(--text-muted, #999); }
+  .game-loader .gl-hint { font-size: 12px; color: var(--text-muted, #999); max-width: 380px; }
   .game-loader button {
     margin-top: 4px; padding: 6px 14px; border-radius: 999px; border: none;
     background: var(--accent, #4caf50); color: #fff; font-weight: 700; cursor: pointer;
@@ -103,12 +110,12 @@
 
 <nav class="cover-navbar">
   <div class="cover-section">
-    <a href="/" class="cover-btn" title="Back to velcro">
+    <a href="/cloud-gaming.html" class="cover-btn" title="Back to cloud gaming">
       <span class="material-symbols-rounded">arrow_back</span>
     </a>
   </div>
   <div class="cover-section center">
-    <span class="cover-title" id="gameTitle">loading&hellip;</span>
+    <span class="cover-title" id="gameTitle"><span class="material-symbols-rounded">cloud</span>loading&hellip;</span>
   </div>
   <div class="cover-section right">
     <a href="/settings.html" class="cover-btn" title="Settings">
@@ -120,12 +127,17 @@
   </div>
 </nav>
 
-<iframe id="gameFrame" class="cover-viewport" allowfullscreen></iframe>
+<iframe
+  id="gameFrame"
+  class="cover-viewport"
+  allow="autoplay; fullscreen; gamepad; clipboard-write; microphone"
+  allowfullscreen
+></iframe>
 
 <div class="game-loader" id="gameLoader">
   <div class="spinner"></div>
   <div class="gl-title" id="glTitle">loading&hellip;</div>
-  <div class="gl-hint">booting the proxy and the game</div>
+  <div class="gl-hint">connecting to the cloud instance &mdash; this streams a real android session, first connect can take a few seconds</div>
   <button id="glDismiss" type="button" hidden>still loading &mdash; show anyway</button>
 </div>
 
@@ -134,7 +146,7 @@
 <script src="/a11y.js"></script>
 <script src="/click-glow.js"></script>
 <script src="/transitions.js"></script>
-<script type="module">
+<script>
   const params = new URLSearchParams(location.search);
   const loaderEl = document.getElementById("gameLoader");
   const glDismiss = document.getElementById("glDismiss");
@@ -148,32 +160,34 @@
   glDismiss.addEventListener("click", hideLoader);
   setTimeout(() => { if (!loaderHidden) glDismiss.hidden = false; }, 8000);
   setTimeout(hideLoader, 45000);
-  // url comes from the query string, so a shared link could carry javascript:,
-  // data:, etc. The proxy engines are meant to load arbitrary http(s) targets;
-  // anything with a non-http(s) scheme is rejected here before it can reach an
-  // encodeUrl() call or the raw frame.src fallback below.
+
   function sanitizeTarget(raw) {
     if (!raw) return "";
     const s = String(raw).trim();
     if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^https?:/i.test(s)) return "";
     return s;
   }
+
   const gameUrl = sanitizeTarget(params.get("url"));
-  const title = params.get("title") || "game";
-  history.replaceState({}, "", "/game.html");
-  document.getElementById("gameTitle").textContent = title;
+  const title = params.get("title") || "cloud gaming";
+  history.replaceState({}, "", "/cloud-player.html");
+
+  document.getElementById("gameTitle").innerHTML =
+    '<span class="material-symbols-rounded">cloud</span>' + title;
   document.getElementById("glTitle").textContent = title;
-  document.title = title + " — velcro";
-  window.VelcroCloak?.apply();
+  document.title = title + " — velcro cloud";
+
   document.getElementById("closeBtn").addEventListener("click", () => history.back());
 
   const frame = document.getElementById("gameFrame");
   frame.addEventListener("load", () => { if (frame.src) setTimeout(hideLoader, 250); });
 
-  // same-origin games (self-contained loaders under /games/) run directly,
-  // not through the proxy.
-  const isLocal = gameUrl && (gameUrl.startsWith("/") || gameUrl.startsWith(location.origin + "/"));
-
+  // nowgg.fun's actual game-server pages (the *.ip.nowgg.fun subdomain a
+  // session gets redirected to) send X-Frame-Options: SAMEORIGIN, so a
+  // plain iframe gets refused by the browser no matter what velcro does —
+  // that header is enforced client-side against the embedding origin.
+  // Routing through velcro's own scramjet proxy sidesteps it, since the
+  // browser then sees the content served from velcro's own origin.
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement("script");
@@ -224,43 +238,15 @@
     if (gameUrl) frame.src = controller.encodeUrl(gameUrl);
   }
 
-  async function initUv() {
-    const customWisp = localStorage.getItem("velcro_wisp_server");
-    const localWisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
-    const hasLocalWisp = await fetch("/api/wisp-available").then(r => r.ok).catch(() => false);
-    const WISP = customWisp || (hasLocalWisp ? localWisp : "wss://anura.pro/wisp/");
-
-    await loadScript("/uv/uv.bundle.js");
-    await loadScript("/uv/uv.config.js");
-    const { BareMuxConnection } = await import("/bare-mux/index.mjs");
-
-    const existing = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(existing.map((r) => r.unregister()));
-    if (existing.length > 0) await new Promise((r) => setTimeout(r, 600));
-    const reg = await navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/" });
-    await waitForActivation(reg);
-
-    const conn = new BareMuxConnection("/bare-mux/worker.js");
-    await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
-
-    if (gameUrl) frame.src = self.__uv$config.prefix + self.__uv$config.encodeUrl(gameUrl);
+  if (gameUrl) {
+    initScramjet().catch((err) => {
+      console.error("Proxy failed, trying direct load:", err);
+      frame.src = gameUrl;
+    });
+  } else {
+    document.getElementById("glTitle").textContent = "no game specified";
+    glDismiss.hidden = false;
   }
-
-  async function init() {
-    if (isLocal) { frame.src = gameUrl; return; }
-    const engine = localStorage.getItem("velcro_proxy_engine") || "scramjet";
-    if (engine === "uv") return initUv();
-    return initScramjet();
-  }
-
-  (async () => {
-    try {
-      await init();
-    } catch (err) {
-      console.error("Proxy failed, loading game directly:", err);
-      if (gameUrl) frame.src = gameUrl;
-    }
-  })();
 </script>
 </body>
 </html>
