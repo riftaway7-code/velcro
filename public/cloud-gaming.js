@@ -17,7 +17,7 @@
   APPS.forEach(function (app) {
     var a = document.createElement("a");
     a.className = "game-card";
-    a.href = "/cloud-player.html?url=" + encodeURIComponent(app.url) + "&title=" + encodeURIComponent(app.title);
+    a.href = "/browser.html?url=" + encodeURIComponent(app.url);
 
     var cover = document.createElement("span");
     cover.className = "cover";

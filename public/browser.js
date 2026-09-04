@@ -229,4 +229,18 @@ document.querySelectorAll(".quick-link").forEach((btn) => {
   btn.addEventListener("click", () => navigate(btn.dataset.url));
 });
 
+// ?url= lets other pages (like cloud-gaming.html) deep-link straight into
+// a proxied page instead of dropping the user on the blank address bar.
+function sanitizeDeepLink(raw) {
+  if (!raw) return null;
+  const s = raw.trim();
+  if (!/^https?:\/\//i.test(s)) return null;
+  return s;
+}
+const deepLinkUrl = sanitizeDeepLink(new URLSearchParams(location.search).get("url"));
+if (deepLinkUrl) {
+  history.replaceState({}, "", "/browser.html");
+  pendingUrl = deepLinkUrl;
+}
+
 initProxy();
