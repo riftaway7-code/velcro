@@ -6,6 +6,10 @@ import { lookup } from "dns/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { server as wispServer } from "@mercuryworkshop/wisp-js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import db from "./db.js";
+import { auth, SECRET } from "./auth.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -77,6 +81,66 @@ app.post("/api/chat/send", (req, res) => {
   const msg = { name, text, time: Date.now() };
   chatHistory.push(msg);
   if (chatHistory.length > CHAT_MAX) chatHistory.shift();
+  res.json({ ok: true });
+});
+
+// ── accounts ──────────────────────────────────────────────────────────────
+function publicUser(row) {
+  return {
+    id: row.id,
+    email: row.email,
+    username: row.username,
+    favorites: JSON.parse(row.favorites),
+    recents: JSON.parse(row.recents),
+    settings: JSON.parse(row.settings),
+  };
+}
+
+app.post("/auth/signup", async (req, res) => {
+  const { email, username, password } = req.body || {};
+  if (!email || !username || !password) return res.status(400).json({ error: "all fields required" });
+  if (username.trim().length > 24) return res.status(400).json({ error: "username must be 24 characters or fewer" });
+  if (password.length < 6) return res.status(400).json({ error: "password must be at least 6 characters" });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const info = db
+      .prepare("INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)")
+      .run(email.toLowerCase().trim(), username.trim(), hash);
+    const token = jwt.sign({ id: info.lastInsertRowid, username: username.trim() }, SECRET, { expiresIn: "30d" });
+    res.json({ token, username: username.trim() });
+  } catch (e) {
+    if (String(e.message).includes("UNIQUE")) return res.status(400).json({ error: "email already in use" });
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: "all fields required" });
+  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(String(email).toLowerCase().trim());
+  if (!user) return res.status(401).json({ error: "invalid email or password" });
+  const match = await bcrypt.compare(password, user.password_hash);
+  if (!match) return res.status(401).json({ error: "invalid email or password" });
+  const token = jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: "30d" });
+  res.json({ token, username: user.username });
+});
+
+app.get("/auth/me", auth, (req, res) => {
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+  if (!user) return res.status(404).json({ error: "not found" });
+  res.json(publicUser(user));
+});
+
+app.put("/api/sync", auth, (req, res) => {
+  const { favorites, recents, settings } = req.body || {};
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+  if (!user) return res.status(404).json({ error: "not found" });
+  db.prepare("UPDATE users SET favorites = ?, recents = ?, settings = ? WHERE id = ?").run(
+    JSON.stringify(favorites ?? JSON.parse(user.favorites)),
+    JSON.stringify(recents ?? JSON.parse(user.recents)),
+    JSON.stringify(settings ?? JSON.parse(user.settings)),
+    req.user.id
+  );
   res.json({ ok: true });
 });
 

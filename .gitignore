@@ -5,3 +5,4 @@ public/epoxy/
 public/uv/
 .env
 *.log
+data/

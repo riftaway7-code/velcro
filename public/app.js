@@ -60,6 +60,14 @@
     if (i === -1) favs.push(id); else favs.splice(i, 1);
     try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) {}
     renderFavorites();
+    pushAccountSync();
+  }
+
+  var syncTimer = null;
+  function pushAccountSync() {
+    if (!window.velcroAccount || !window.velcroAccount.getToken()) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(function () { window.velcroAccount.sync(); }, 1500);
   }
 
   function reportBroken(g, btn) {
@@ -84,6 +92,8 @@
       var counts = JSON.parse(localStorage.getItem(PLAY_COUNTS_KEY) || "{}");
       counts[id] = (counts[id] || 0) + 1;
       localStorage.setItem(PLAY_COUNTS_KEY, JSON.stringify(counts));
+
+      pushAccountSync();
     } catch (e) {}
   }
 

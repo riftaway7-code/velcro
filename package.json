@@ -15,6 +15,9 @@
     "@mercuryworkshop/scramjet": "^1.1.0",
     "@mercuryworkshop/wisp-js": "^0.4.1",
     "@titaniumnetwork-dev/ultraviolet": "^3.2.10",
-    "express": "^4.18.2"
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3"
   }
 }

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>account — velcro</title>
+<script src="/theme.js"></script>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#7151a8" />
+<style>
+  .account-main {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  .account-main h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+
+  .account-hint {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+
+  .account-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .account-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .account-tab.active { border-color: var(--accent); color: var(--text); }
+
+  .account-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+  .account-field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .account-field input {
+    background: var(--bg-elevated);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .account-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .account-submit {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 800;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .account-submit:hover { background: var(--accent-bright); }
+  .account-submit:disabled { opacity: 0.6; cursor: default; }
+
+  .account-error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin: 0 0 14px;
+    display: none;
+  }
+
+  .account-error.show { display: block; }
+
+  .account-profile {
+    display: none;
+    background: var(--bg-elevated);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .account-profile.show { display: block; }
+  .account-form.hide { display: none; }
+
+  .account-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    color: var(--accent-bright);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+
+  .account-profile-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text);
+    margin: 0 0 4px;
+  }
+
+  .account-profile-email {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0 0 18px;
+  }
+
+  .account-sync-note {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .account-logout {
+    background: transparent;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .account-logout:hover { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<script src="/cloak.js"></script>
+<script src="/panic.js"></script>
+<script src="/a11y.js"></script>
+<script src="/click-glow.js"></script>
+<script src="/transitions.js"></script>
+
+<header class="topbar">
+  <button id="scrollTop" class="scroll-top" type="button" aria-label="Scroll to top">
+    <span class="material-symbols-rounded">arrow_upward</span>
+  </button>
+  <div class="topbar-right" style="margin-left: auto;">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+      <span class="material-symbols-rounded">dark_mode</span>
+    </button>
+  </div>
+</header>
+
+<nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
+  <a href="/"><span class="material-symbols-rounded">sports_esports</span>games</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
+  <a href="/cloud-gaming.html"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
+  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
+  <a href="/chat.html"><span class="material-symbols-rounded">forum</span>chat</a>
+  <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
+  <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
+  <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
+  <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
+  <a href="/account.html" class="active"><span class="material-symbols-rounded">person</span>account</a>
+  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
+</nav>
+
+<main class="account-main">
+  <h1>account</h1>
+  <p class="account-hint">sign in to sync your favorites, recents, and theme across devices.</p>
+
+  <p class="account-error" id="accountError"></p>
+
+  <div id="accountForm">
+    <div class="account-tabs">
+      <button class="account-tab active" id="tabLogin" type="button">log in</button>
+      <button class="account-tab" id="tabSignup" type="button">sign up</button>
+    </div>
+
+    <form id="loginForm" class="account-form">
+      <div class="account-field">
+        <label for="loginEmail">email</label>
+        <input id="loginEmail" type="email" autocomplete="email" required />
+      </div>
+      <div class="account-field">
+        <label for="loginPassword">password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required />
+      </div>
+      <button class="account-submit" type="submit">log in</button>
+    </form>
+
+    <form id="signupForm" class="account-form hide">
+      <div class="account-field">
+        <label for="signupUsername">username</label>
+        <input id="signupUsername" type="text" maxlength="24" autocomplete="username" required />
+      </div>
+      <div class="account-field">
+        <label for="signupEmail">email</label>
+        <input id="signupEmail" type="email" autocomplete="email" required />
+      </div>
+      <div class="account-field">
+        <label for="signupPassword">password</label>
+        <input id="signupPassword" type="password" minlength="6" autocomplete="new-password" required />
+      </div>
+      <button class="account-submit" type="submit">sign up</button>
+    </form>
+  </div>
+
+  <div class="account-profile" id="accountProfile">
+    <div class="account-avatar" id="accountAvatar"></div>
+    <p class="account-profile-name" id="accountName"></p>
+    <p class="account-profile-email" id="accountEmail"></p>
+    <p class="account-sync-note" id="accountSyncNote">
+      <span class="material-symbols-rounded" style="font-size: 15px;">sync</span>
+      synced
+    </p>
+    <button class="account-logout" id="logoutBtn" type="button">log out</button>
+  </div>
+</main>
+
+<script src="/account.js"></script>
+<script>
+(function () {
+  var errorEl = document.getElementById("accountError");
+  var formWrap = document.getElementById("accountForm");
+  var profileWrap = document.getElementById("accountProfile");
+  var tabLogin = document.getElementById("tabLogin");
+  var tabSignup = document.getElementById("tabSignup");
+  var loginForm = document.getElementById("loginForm");
+  var signupForm = document.getElementById("signupForm");
+
+  tabLogin.addEventListener("click", function () {
+    tabLogin.classList.add("active");
+    tabSignup.classList.remove("active");
+    loginForm.classList.remove("hide");
+    signupForm.classList.add("hide");
+    errorEl.classList.remove("show");
+  });
+  tabSignup.addEventListener("click", function () {
+    tabSignup.classList.add("active");
+    tabLogin.classList.remove("active");
+    signupForm.classList.remove("hide");
+    loginForm.classList.add("hide");
+    errorEl.classList.remove("show");
+  });
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add("show");
+  }
+
+  function showProfile() {
+    var username = window.velcroAccount.getUsername() || "?";
+    formWrap.style.display = "none";
+    profileWrap.classList.add("show");
+    document.getElementById("accountAvatar").textContent = username.slice(0, 1).toUpperCase();
+    document.getElementById("accountName").textContent = username;
+    document.getElementById("accountEmail").textContent = "";
+    fetch("/auth/me", { headers: { authorization: "Bearer " + window.velcroAccount.getToken() } })
+      .then(function (r) { return r.json(); })
+      .then(function (me) { document.getElementById("accountEmail").textContent = me.email || ""; })
+      .catch(function () {});
+  }
+
+  function showForm() {
+    formWrap.style.display = "";
+    profileWrap.classList.remove("show");
+  }
+
+  if (window.velcroAccount.getToken()) showProfile();
+
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    errorEl.classList.remove("show");
+    var submitBtn = loginForm.querySelector(".account-submit");
+    submitBtn.disabled = true;
+    window.velcroAccount
+      .login(document.getElementById("loginEmail").value.trim(), document.getElementById("loginPassword").value)
+      .then(showProfile)
+      .catch(function (err) { showError(err.message); })
+      .finally(function () { submitBtn.disabled = false; });
+  });
+
+  signupForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    errorEl.classList.remove("show");
+    var submitBtn = signupForm.querySelector(".account-submit");
+    submitBtn.disabled = true;
+    window.velcroAccount
+      .signup(
+        document.getElementById("signupEmail").value.trim(),
+        document.getElementById("signupUsername").value.trim(),
+        document.getElementById("signupPassword").value
+      )
+      .then(showProfile)
+      .catch(function (err) { showError(err.message); })
+      .finally(function () { submitBtn.disabled = false; });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    window.velcroAccount.logout();
+    showForm();
+  });
+})();
+</script>
+</body>
+</html>
