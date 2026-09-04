@@ -21,6 +21,12 @@ db.exec(`
     settings TEXT NOT NULL DEFAULT '{}',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS plays (
+    id TEXT NOT NULL,
+    time INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_plays_time ON plays(time);
 `);
 
 export default db;

@@ -16,6 +16,8 @@
   var recentGrid = document.getElementById("recentGrid");
   var topSection = document.getElementById("topSection");
   var topGrid = document.getElementById("topGrid");
+  var trendingSection = document.getElementById("trendingSection");
+  var trendingGrid = document.getElementById("trendingGrid");
   var favSection = document.getElementById("favSection");
   var favGrid = document.getElementById("favGrid");
   var gameCountEl = document.getElementById("gameCount");
@@ -95,6 +97,12 @@
 
       pushAccountSync();
     } catch (e) {}
+    fetch("/api/plays", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id }),
+      keepalive: true
+    }).catch(function () {});
   }
 
   function buildCard(g) {
@@ -223,6 +231,19 @@
     renderRow(topSection, topGrid, list);
   }
 
+  function renderTrending() {
+    if (!trendingSection) return;
+    fetch("/api/trending?limit=10")
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var list = (data.games || [])
+          .map(function (row) { return games.find(function (g) { return g.id === row.id; }); })
+          .filter(Boolean);
+        renderRow(trendingSection, trendingGrid, list);
+      })
+      .catch(function () { trendingSection.hidden = true; });
+  }
+
   function buildPills() {
     var categories = ["all"].concat(
       Array.from(new Set(games.map(function (g) { return g.category; }))).sort()
@@ -281,6 +302,7 @@
       renderFavorites();
       renderRecent();
       renderTop();
+      renderTrending();
     })
     .catch(function (err) {
       gridEl.innerHTML = "";

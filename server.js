@@ -144,6 +144,30 @@ app.put("/api/sync", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── trending ──────────────────────────────────────────────────────────────
+const TRENDING_WINDOW_MS = 24 * 60 * 60 * 1000;
+const PLAYS_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const insertPlay = db.prepare("INSERT INTO plays (id, time) VALUES (?, ?)");
+const prunePlays = db.prepare("DELETE FROM plays WHERE time < ?");
+const trendingQuery = db.prepare(
+  "SELECT id, COUNT(*) as plays FROM plays WHERE time > ? GROUP BY id ORDER BY plays DESC LIMIT ?"
+);
+
+setInterval(() => prunePlays.run(Date.now() - PLAYS_RETENTION_MS), 60 * 60 * 1000);
+
+app.post("/api/plays", (req, res) => {
+  const id = String(req.body?.id || "").slice(0, 200);
+  if (!id) return res.status(400).json({ ok: false });
+  insertPlay.run(id, Date.now());
+  res.json({ ok: true });
+});
+
+app.get("/api/trending", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+  const rows = trendingQuery.all(Date.now() - TRENDING_WINDOW_MS, limit);
+  res.json({ ok: true, games: rows });
+});
+
 const reportCounts = new Map();
 const REPORT_WEBHOOK = process.env.REPORT_WEBHOOK || "";
 setInterval(() => reportCounts.clear(), 10 * 60 * 1000);
