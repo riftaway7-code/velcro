@@ -50,6 +50,36 @@ app.get("/api/stats/users", (_, res) => {
   res.json({ ok: true, totalUsers, activeUsers: presenceMap.size });
 });
 
+// ── chat ──────────────────────────────────────────────────────────────────
+const chatHistory = [];
+const CHAT_MAX = 100;
+const chatActiveUsers = new Map();
+
+app.get("/api/chat/messages", (req, res) => {
+  const since = parseInt(req.query.since || 0, 10) || 0;
+  const sid = String(req.query.sid || "").slice(0, 64);
+  if (sid) {
+    chatActiveUsers.set(sid, Date.now());
+    const cutoff = Date.now() - 10000;
+    for (const [id, t] of chatActiveUsers) if (t < cutoff) chatActiveUsers.delete(id);
+  }
+  res.json({
+    messages: since === 0 ? chatHistory : chatHistory.filter((m) => m.time > since),
+    online: chatActiveUsers.size,
+  });
+});
+
+app.post("/api/chat/send", (req, res) => {
+  let { name, text } = req.body || {};
+  name = String(name || "anon").slice(0, 24).trim() || "anon";
+  text = String(text || "").slice(0, 500).trim();
+  if (!text) return res.status(400).json({ ok: false, error: "empty" });
+  const msg = { name, text, time: Date.now() };
+  chatHistory.push(msg);
+  if (chatHistory.length > CHAT_MAX) chatHistory.shift();
+  res.json({ ok: true });
+});
+
 const reportCounts = new Map();
 const REPORT_WEBHOOK = process.env.REPORT_WEBHOOK || "";
 setInterval(() => reportCounts.clear(), 10 * 60 * 1000);
