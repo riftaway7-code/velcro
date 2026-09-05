@@ -1,0 +1,4050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>velcro (standalone)</title>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@300..900&family=Nunito:wght@400;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #7151a8;
+  --bg-elevated: #8768ba;
+  --bg-elevated-hover: #7e5db2;
+  --accent: #3ddc7a;
+  --accent-bright: #2bbd63;
+  --accent-glow: rgba(61, 220, 122, 0.32);
+  --accent-soft: #5a3f8a;
+  --text: #fbf8ff;
+  --text-muted: #d9cdee;
+  --border: #9b7fc4;
+  --shadow: rgba(30, 15, 55, 0.35);
+  --icon-color: #000000;
+  --cat-color: #000000;
+  --filter-bg: #000000;
+  --filter-text: #f5f5f5;
+  --filter-border: #000000;
+
+  --font-display: "Sour Gummy", "Comic Sans MS", sans-serif;
+  --font-body: "Nunito", -apple-system, "Segoe UI", sans-serif;
+}
+
+html[data-theme="light"] {
+  --bg: #f4f0fb;
+  --bg-elevated: #ffffff;
+  --bg-elevated-hover: #ece4fa;
+  --accent: #7151a8;
+  --accent-bright: #5d3f92;
+  --accent-glow: rgba(113, 81, 168, 0.22);
+  --accent-soft: #e6ddf7;
+  --text: #251a3d;
+  --text-muted: #6b5d8a;
+  --border: #ddd0f2;
+  --shadow: rgba(80, 60, 130, 0.12);
+  --icon-color: #5d3f92;
+  --cat-color: #5d3f92;
+  --filter-bg: #ffffff;
+  --filter-text: #251a3d;
+  --filter-border: #ddd0f2;
+}
+
+html[data-theme="dark"] {
+  --bg: #0a1f10;
+  --bg-elevated: #123420;
+  --bg-elevated-hover: #1a4429;
+  --accent: #4ade80;
+  --accent-bright: #7bf1a8;
+  --accent-glow: rgba(74, 222, 128, 0.35);
+  --accent-soft: #1f4a2c;
+  --text: #eafbee;
+  --text-muted: #86c99a;
+  --border: #2c5c3a;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --icon-color: #7bf1a8;
+  --cat-color: #7bf1a8;
+  --filter-bg: #123420;
+  --filter-text: #86c99a;
+  --filter-border: #2c5c3a;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  position: relative;
+  cursor: var(--custom-cursor, url('/assets/cursor-greendot.png') 3 2, auto);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--bg);
+  background-image:
+    var(--wallpaper-image, none),
+    radial-gradient(1100px 650px at 100% 0%, var(--accent-glow), transparent 60%),
+    radial-gradient(800px 500px at 0% 100%, var(--accent-glow), transparent 65%);
+  background-size: cover, auto, auto;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg);
+  opacity: var(--wallpaper-scrim, 0);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 20px clamp(16px, 4vw, 48px);
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  color: var(--accent-bright);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
+}
+
+.site-nav a .material-symbols-rounded { font-size: 18px; }
+
+.site-nav a:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+.site-nav a.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  transition: border-color 0.2s ease;
+}
+
+.search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+
+.search-icon { color: var(--icon-color); font-size: 20px; }
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  width: 180px;
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.scroll-top {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--icon-color);
+  cursor: pointer;
+  box-shadow: 0 6px 16px var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.scroll-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.scroll-top:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: translateY(-2px); }
+.scroll-top .material-symbols-rounded { font-size: 22px; }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--icon-color);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.theme-toggle:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+.theme-toggle .material-symbols-rounded { font-size: 22px; }
+
+main {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 20px clamp(16px, 4vw, 48px) 80px;
+}
+
+.hero {
+  text-align: center;
+  padding: 40px 0 20px;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(44px, 8vw, 84px);
+  margin: 0;
+  color: var(--text);
+}
+
+.hero h1 .dot { color: var(--accent-bright); }
+
+.tagline {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text-muted);
+  margin: 12px 0 0;
+  min-height: 1.4em;
+}
+
+.user-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.user-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px 1px var(--accent-glow);
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--accent-bright);
+  vertical-align: -0.15em;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.games-row {
+  margin: 0 0 32px;
+}
+
+.row-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  text-transform: lowercase;
+  margin: 0 0 14px;
+}
+
+.row-title .material-symbols-rounded {
+  color: var(--icon-color);
+  font-size: 20px;
+}
+
+.games-row .games-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.controls {
+  margin: 32px 0 24px;
+}
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.pill {
+  border: 2px solid var(--filter-border);
+  background: var(--filter-bg);
+  color: var(--filter-text);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
+}
+
+.pill:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+.pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.loading-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 60px 0;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.game-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: 0 6px 16px var(--shadow);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.game-count { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+#randomGame { display: inline-flex; align-items: center; gap: 6px; }
+#randomGame .material-symbols-rounded { font-size: 18px; }
+
+.card-fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.card-fav .material-symbols-rounded { font-size: 18px; }
+.game-card:hover .card-fav, .card-fav:focus-visible { opacity: 1; }
+.card-fav.on { opacity: 1; color: #ffd34d; }
+.card-fav:hover { transform: scale(1.12); }
+
+.card-report {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.game-card:hover .card-report, .card-report:focus-visible { opacity: 1; }
+.card-report:disabled { opacity: 1; background: var(--accent); cursor: default; }
+
+.game-card:hover, .game-card:focus-visible {
+  transform: translateY(-6px) rotate(-0.5deg);
+  border-color: var(--accent);
+  box-shadow: 0 14px 28px var(--shadow);
+}
+
+.game-card .cover {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--accent-soft);
+}
+
+.game-card .info {
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.game-card .name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.15;
+}
+
+.game-card .cat {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  text-transform: lowercase;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 0;
+  font-size: 15px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .topbar { justify-content: center; }
+  .search-input { width: 140px; }
+}
+
+:root.embed[data-theme] {
+  --bg: #1c1418;
+  --bg-elevated: #2a1f24;
+  --bg-elevated-hover: #33262f;
+  --accent: #e0824a;
+  --accent-bright: #eb9560;
+  --accent-glow: rgba(224, 130, 74, 0.30);
+  --accent-soft: #3a2a2f;
+  --text: #e6d3c6;
+  --text-muted: #a98d80;
+  --border: rgba(232, 200, 180, 0.14);
+  --shadow: rgba(0, 0, 0, 0.45);
+  --icon-color: #e0824a;
+  --cat-color: #e0824a;
+  --filter-bg: #2a1f24;
+  --filter-text: #e6d3c6;
+  --filter-border: rgba(232, 200, 180, 0.14);
+}
+
+html.embed body { background: var(--bg); }
+html.embed .site-nav { display: none; }
+html.embed .hero { display: none; }
+html.embed .topbar { border-bottom: 0; }
+html.embed main { padding-top: 16px; }
+html.embed .games-grid,
+html.embed .games-row .games-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+html.embed .game-card { border-radius: 26px; }
+html.embed .game-card .name { font-size: 19px; }
+html.embed .game-card .info { padding: 14px 16px 18px; }
+
+/* accessibility settings */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+html.high-contrast {
+  --border: #000000;
+  --text: #000000;
+  --text-muted: #1a1a1a;
+  --bg: #ffffff;
+  --bg-elevated: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.55);
+}
+html.high-contrast[data-theme="dark"],
+html.high-contrast[data-theme="midnight"] {
+  --border: #ffffff;
+  --text: #ffffff;
+  --text-muted: #e6e6e6;
+  --bg: #000000;
+  --bg-elevated: #000000;
+  --shadow: rgba(0, 0, 0, 0.9);
+}
+html.high-contrast .game-card,
+html.high-contrast .pill,
+html.high-contrast .settings-group { border-width: 2px; }
+
+#page-transition {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#page-transition.pt-visible {
+  animation: ptFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: all;
+}
+
+#page-transition.pt-out {
+  animation: ptFadeOut 0.38s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes ptFadeIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ptFadeOut {
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.pt-spinner {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent-bright);
+  animation: ptSpin 1.1s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+}
+
+.pt-ring2 {
+  inset: 9px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: var(--accent);
+  border-left-color: var(--accent-bright);
+  animation-duration: 0.8s;
+  animation-direction: reverse;
+}
+
+@keyframes ptSpin { to { transform: rotate(360deg); } }
+
+.pt-msg {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.pt-msg.pt-msg-in {
+  animation: ptMsgFade 0.35s ease;
+}
+
+@keyframes ptMsgFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.click-glow {
+  position: fixed;
+  z-index: 99999;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-bright) 0%, var(--accent) 40%, transparent 72%);
+  box-shadow: 0 0 16px 4px var(--accent-glow);
+  pointer-events: none;
+  animation: clickGlowPulse 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes clickGlowPulse {
+  0%   { transform: scale(0.3); opacity: 0.9; }
+  70%  { opacity: 0.5; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.cloud-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.cloud-badge .material-symbols-rounded { font-size: 16px; }
+
+#stickyNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px clamp(16px, 4vw, 32px);
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 6px 16px var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+#stickyNav.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.sticky-nav-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--accent-bright);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sticky-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sticky-nav-links::-webkit-scrollbar { display: none; }
+
+.sticky-nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+  text-transform: lowercase;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sticky-nav-links a .material-symbols-rounded { font-size: 16px; }
+.sticky-nav-links a:hover { border-color: var(--accent); color: var(--accent-bright); }
+.sticky-nav-links a.active { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+
+.sticky-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sticky-nav-search { padding: 6px 12px; }
+.sticky-nav-search .search-input { width: 130px; font-size: 13px; }
+.sticky-nav-search .search-icon { font-size: 17px; }
+
+#stickyNavTheme { width: 34px; height: 34px; }
+#stickyNavTheme .material-symbols-rounded { font-size: 18px; }
+
+@media (max-width: 900px) {
+  .sticky-nav-links a .sticky-nav-label { display: none; }
+  .sticky-nav-search { display: none; }
+}
+
+
+html, body.player-open { overflow: hidden; }
+.view { display: none; }
+.view.active { display: block; }
+.site-nav a { cursor: pointer; }
+
+#gamePlayer {
+  position: fixed; inset: 0; z-index: 200; display: none;
+  flex-direction: column; background: var(--bg);
+}
+#gamePlayer.open { display: flex; }
+.cover-navbar { display: flex; align-items: center; height: 60px; padding: 0 18px; background: var(--bg-elevated); border-bottom: 2px solid var(--border); }
+.cover-section { flex: 1; display: flex; align-items: center; gap: 8px; }
+.cover-section.center { justify-content: center; min-width: 0; }
+.cover-section.right { justify-content: flex-end; }
+.cover-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }
+.cover-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-elevated); color: var(--icon-color); cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease; }
+.cover-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+.cover-btn .material-symbols-rounded { font-size: 20px; }
+.cover-viewport { position: absolute; inset: 0; width: 100%; height: 100%; border: none; display: block; background: #000; }
+.game-loader { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: var(--bg); color: var(--text); z-index: 5; transition: opacity 0.35s ease; }
+.game-loader.gone { opacity: 0; pointer-events: none; }
+.game-loader .spinner { width: 34px; height: 34px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.game-loader .gl-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+.game-loader .gl-hint { font-size: 12px; color: var(--text-muted); max-width: 340px; text-align: center; }
+.game-loader button { margin-top: 4px; padding: 6px 14px; border-radius: 999px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; }
+
+.browser-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.browser-bar input { flex: 1; }
+.proxy-frame { width: 100%; height: 65vh; border: none; border-radius: 14px; background: #000; }
+.unavailable { border: 2px dashed var(--border); border-radius: 18px; padding: 40px; text-align: center; color: var(--text-muted); max-width: 500px; margin: 0 auto; }
+.unavailable .material-symbols-rounded { font-size: 40px; color: var(--accent-bright); display: block; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="view active" id="view-games">
+  <header class="topbar">
+    <div class="topbar-right" style="margin-left: auto;">
+      <div class="search-wrapper">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input id="gamesSearch" class="search-input" type="text" placeholder="search" autocomplete="off" />
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+        <span class="material-symbols-rounded">dark_mode</span>
+      </button>
+    </div>
+  </header>
+  <nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;" id="mainNav">
+    <a data-view="games" class="active"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <h1>velcro</h1>
+      <p class="tagline">standalone build &mdash; games/apps/movies/browser are genuinely live</p>
+    </section>
+    <section class="controls">
+      <div class="game-count" id="gameCount"></div>
+    </section>
+    <section class="games-grid" id="gamesGrid"></section>
+  </main>
+</div>
+
+<div class="view" id="view-apps">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps" class="active"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>apps</h1><p class="tagline">other useful sites, tunneled the same way</p></section>
+    <section class="games-grid" id="appsGrid"></section>
+  </main>
+</div>
+
+<div class="view" id="view-movies">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies" class="active"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>movies</h1><p class="tagline" id="moviesStatus">loading live from TMDB&hellip;</p></section>
+    <section class="games-grid" id="moviesGrid"></section>
+  </main>
+</div>
+
+<div class="view" id="view-browser">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser" class="active"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>browser</h1><p class="tagline" id="proxyStatus">initializing scramjet + wisp&hellip;</p></section>
+    <div class="browser-bar">
+      <input id="urlBar" class="search-input" style="background:var(--bg-elevated); border:2px solid var(--border); border-radius:999px; padding:10px 16px;" placeholder="enter a url" />
+      <button id="goBtn" class="pill active" style="border:none;">go</button>
+    </div>
+    <iframe id="proxyFrame" class="proxy-frame"></iframe>
+  </main>
+</div>
+
+<div class="view" id="view-chat">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat" class="active"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>chat</h1></section>
+    <div class="unavailable"><span class="material-symbols-rounded">forum</span>chat needs a live WebSocket server relaying messages between real users &mdash; that can't exist inside a single static file. use the full site for this.</div>
+  </main>
+</div>
+
+<div class="view" id="view-account">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account" class="active"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>account</h1></section>
+    <div class="unavailable"><span class="material-symbols-rounded">person</span>accounts need a real server + database to check logins against &mdash; a static file has nowhere to store or verify that. use the full site for this.</div>
+  </main>
+</div>
+
+<div id="gamePlayer">
+  <nav class="cover-navbar">
+    <div class="cover-section">
+      <button class="cover-btn" id="playerBack" title="Back to velcro"><span class="material-symbols-rounded">arrow_back</span></button>
+    </div>
+    <div class="cover-section center"><span class="cover-title" id="gameTitle">loading&hellip;</span></div>
+    <div class="cover-section right">
+      <button class="cover-btn" id="playerClose" title="Close"><span class="material-symbols-rounded">close</span></button>
+    </div>
+  </nav>
+  <div style="position:relative; flex:1;">
+    <iframe id="gameFrame" class="cover-viewport" allowfullscreen></iframe>
+    <div class="game-loader" id="gameLoader">
+      <div class="spinner"></div>
+      <div class="gl-title" id="glTitle">loading&hellip;</div>
+      <div class="gl-hint" id="glHint">booting the proxy and the game</div>
+      <button id="glDismiss" type="button" hidden>still loading &mdash; show anyway</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GAMES = [
+  {
+    "id": "plague-inc-evolved",
+    "title": "Plague Inc: Evolved",
+    "url": "/games/plague-inc-evolved.html",
+    "thumbnail": "https://cdn.cloudflare.steamstatic.com/steam/apps/246620/header.jpg",
+    "category": "Simulation"
+  },
+  {
+    "id": "dunjunz",
+    "title": "Dunjunz",
+    "url": "https://www.dunjunz.com/",
+    "thumbnail": "https://www.dunjunz.com/og-image.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "geometry-dash",
+    "title": "Geometry Dash",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/gdlite/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/geodash.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "slope",
+    "title": "Slope",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/slope",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/slope.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "run3",
+    "title": "Run 3",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/run3/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/rerun.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "flappy-bird",
+    "title": "Flappy Bird",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flappybird/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/hep.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "stickman-hook",
+    "title": "Stickman Hook",
+    "url": "https://frog.hpsschools.org/cdn/projects/stickman-hook/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/stickmanhook.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "ovo",
+    "title": "OvO",
+    "url": "https://frog.hpsschools.org/cdn/projects/ovo/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ovo.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "moto-x3m",
+    "title": "Moto X3M",
+    "url": "https://frog.hpsschools.org/cdn/projects/motox3m/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/drive-mad.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "crossy-road",
+    "title": "Crossy Road",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/crossyroad",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/crossyroad.jpeg",
+    "category": "Arcade"
+  },
+  {
+    "id": "btts",
+    "title": "Big Tower Tiny Square",
+    "url": "https://frog.hpsschools.org/cdn/projects/btts/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/btts.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "burrito-bison",
+    "title": "Burrito Bison",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/burrito-bison",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/burritobison.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "adventure-drivers",
+    "title": "Adventure Drivers",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/adventure-drivers",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/adventuredrivers.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "fancy-pants",
+    "title": "Super Fancy Pants Adventure",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/fancy-pants-man.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sfpa.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "learn-to-fly",
+    "title": "Learn to Fly",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/learn-to-fly.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/learn2fly.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "1on1-soccer",
+    "title": "1 on 1 Soccer",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/1on1soccer.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/1on1soccer.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "red-ball-4",
+    "title": "Red Ball 4",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/red-ball4.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/redball4.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "tanuki-sunset",
+    "title": "Tanuki Sunset",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/tanuki-sunset/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/totm.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "hexgl",
+    "title": "HexGL",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/hexgl/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/adofai.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "bouncy-basketball",
+    "title": "Bouncy Basketball",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/bouncy-basketball",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bouncybasketball.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "bob-the-robber-2",
+    "title": "Bob the Robber 2",
+    "url": "https://frog.hpsschools.org/cdn/projects/bobtherobber2/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/baconmaydie.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "basket-bros",
+    "title": "Basket Bros",
+    "url": "https://frog.hpsschools.org/cdn/projects/basketbros-io/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/basketrandom.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "tomb-of-the-mask",
+    "title": "Tomb of the Mask",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/tomb-of-the-mask/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/totm.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "super-fowlst",
+    "title": "Super Fowlst",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/super-foulist/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/hep.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "rerun",
+    "title": "Re:Run",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/rerun",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/rerun.jpg",
+    "category": "Arcade"
+  },
+  {
+    "id": "10-minutes-till-dawn",
+    "title": "10 Minutes Till Dawn",
+    "url": "https://frog.hpsschools.org/cdn/projects/10-minutes-till-dawn/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/btts.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "toss-the-turtle",
+    "title": "Toss the Turtle",
+    "url": "https://frog.hpsschools.org/cdn/projects/tosstheturtle/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/tosstheturtle.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "escape-road",
+    "title": "Escape Road",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/escape-road/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/escape-road.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "simple-loot-idle",
+    "title": "Simple Loot Idle",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/simplelootidle/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/simplelootidle.png",
+    "category": "Arcade"
+  },
+  {
+    "id": "getaway-shootout",
+    "title": "Getaway Shootout",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/rayvon-shootout/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/getaway-shootout.png",
+    "category": "Action"
+  },
+  {
+    "id": "rooftop-snipers",
+    "title": "Rooftop Snipers",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/rooftop-snipers/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/rooftop-snipers.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "rooftop-snipers-2",
+    "title": "Rooftop Snipers 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/rooftop-snipers-2/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/rooftop-snipers2.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "tube-jumpers",
+    "title": "Tube Jumpers",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/tube-jumpers",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/tubejumpers.png",
+    "category": "Action"
+  },
+  {
+    "id": "bloodmoney",
+    "title": "Bloodmoney",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/bloodmoney/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bloodmoney.png",
+    "category": "Action"
+  },
+  {
+    "id": "soccer-random",
+    "title": "Soccer Random",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/soccer-random",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/soccerrandom.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "basket-random",
+    "title": "Basket Random",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/basket-random",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/basketrandom.png",
+    "category": "Action"
+  },
+  {
+    "id": "boxing-random",
+    "title": "Boxing Random",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/boxing-random",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/boxingrandom.png",
+    "category": "Action"
+  },
+  {
+    "id": "volley-random",
+    "title": "Volley Random",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/volley-random",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/volleyrandom.png",
+    "category": "Action"
+  },
+  {
+    "id": "basketball-stars",
+    "title": "Basketball Stars",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/basketball-stars/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bouncybasketball.png",
+    "category": "Action"
+  },
+  {
+    "id": "doom",
+    "title": "DOOM",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/doom/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/doom.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "half-life",
+    "title": "Half-Life",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/half-life/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/halflife.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "superhot",
+    "title": "Superhot",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/super-hot/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/venge.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "buckshot-roulette",
+    "title": "Buckshot Roulette",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/buckshot-roulette/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/dodge.png",
+    "category": "Action"
+  },
+  {
+    "id": "nzp",
+    "title": "Nazi Zombies Portable",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/nzp/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/doom.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "quake",
+    "title": "Quake",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/quake/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/halflife.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "gun-mayhem",
+    "title": "Gun Mayhem",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/gun-mayhem.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gun-mayhem.png",
+    "category": "Action"
+  },
+  {
+    "id": "gun-mayhem-2",
+    "title": "Gun Mayhem 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/gun-mayhem2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gun-mayhem2.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "alien-hominid",
+    "title": "Alien Hominid",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/alien_hominid.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/alien.png",
+    "category": "Action"
+  },
+  {
+    "id": "bacon-may-die",
+    "title": "Bacon May Die",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/bacon-may-die",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/baconmaydie.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "ragdoll-archers",
+    "title": "Ragdoll Archers",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/ragdoll-archers/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ragdoll.png",
+    "category": "Action"
+  },
+  {
+    "id": "ragdoll-hit",
+    "title": "Ragdoll Hit",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/ragdoll/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ragdoll.png",
+    "category": "Action"
+  },
+  {
+    "id": "cuphead",
+    "title": "Cuphead",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/cuphead/decide.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cuphead.png",
+    "category": "Action"
+  },
+  {
+    "id": "fnf",
+    "title": "Friday Night Funkin'",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnf/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnf.png",
+    "category": "Action"
+  },
+  {
+    "id": "bart-blast",
+    "title": "Bart Blast",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/bartblast/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bartblast.png",
+    "category": "Action"
+  },
+  {
+    "id": "survivorio",
+    "title": "Survivor.io",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/survivorio/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/survivorio.png",
+    "category": "Action"
+  },
+  {
+    "id": "venge",
+    "title": "Venge.io",
+    "url": "https://venge.io",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/venge.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "ev-io",
+    "title": "ev.io",
+    "url": "https://ev.io",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/venge.jpg",
+    "category": "Action"
+  },
+  {
+    "id": "happy-wheels",
+    "title": "Happy Wheels",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/happywheels",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/happywheels.jpg",
+    "category": "Sports"
+  },
+  {
+    "id": "small-world-cup",
+    "title": "A Small World Cup",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/asmallworldcup",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/aswc.png",
+    "category": "Sports"
+  },
+  {
+    "id": "retro-bowl",
+    "title": "Retro Bowl",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/retro-bowl/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/slope.jpg",
+    "category": "Sports"
+  },
+  {
+    "id": "human-exp-program",
+    "title": "Human Expenditure Program",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/hep/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/hep.png",
+    "category": "Sports"
+  },
+  {
+    "id": "polytrack",
+    "title": "Polytrack",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/polytrack",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/polytrack.jpg",
+    "category": "Racing"
+  },
+  {
+    "id": "slow-roads",
+    "title": "Slow Roads",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/slowroads",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/slowroads.png",
+    "category": "Racing"
+  },
+  {
+    "id": "drive-mad",
+    "title": "Drive Mad",
+    "url": "https://frog.hpsschools.org/cdn/projects/drive-mad/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/drive-mad.png",
+    "category": "Racing"
+  },
+  {
+    "id": "monster-tracks",
+    "title": "Monster Tracks",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/monster-tracks",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/monster-tracks.png",
+    "category": "Racing"
+  },
+  {
+    "id": "drift-hunters",
+    "title": "Drift Hunters",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/drift-hunters/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/drift-hunters.png",
+    "category": "Racing"
+  },
+  {
+    "id": "drift-boss",
+    "title": "Drift Boss",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/drift-boss/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/drift-hunters.png",
+    "category": "Racing"
+  },
+  {
+    "id": "endless-truck",
+    "title": "Endless Truck",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/endless-truck/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/monster-tracks.png",
+    "category": "Racing"
+  },
+  {
+    "id": "fnaf1",
+    "title": "Five Nights at Freddy's",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnaf1",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf1.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaf2",
+    "title": "Five Nights at Freddy's 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnaf2",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf2.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaf3",
+    "title": "Five Nights at Freddy's 3",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnaf3",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf3.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaf4",
+    "title": "Five Nights at Freddy's 4",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnaf4",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf4.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaf-sl",
+    "title": "FNaF Sister Location",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/sisterlocation",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnafsl.jpg",
+    "category": "Horror"
+  },
+  {
+    "id": "pizzeria-simulator",
+    "title": "Pizzeria Simulator",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/pizzeriasimulator",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/pizzeriasimulator.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaf-world",
+    "title": "FNaF World",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnafworld",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnafworld.png",
+    "category": "Horror"
+  },
+  {
+    "id": "ucn",
+    "title": "Ultimate Custom Night",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/ucn",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ucn.jpg",
+    "category": "Horror"
+  },
+  {
+    "id": "fnaw",
+    "title": "Five Nights at Winstons",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnaw/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf1.png",
+    "category": "Horror"
+  },
+  {
+    "id": "fnae",
+    "title": "Five Nights at Epsteins",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fnae/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnae.png",
+    "category": "Horror"
+  },
+  {
+    "id": "baldis-basics",
+    "title": "Baldi's Basics",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/baldis-basics",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/baldi.png",
+    "category": "Horror"
+  },
+  {
+    "id": "batim",
+    "title": "Bendy and the Ink Machine",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/batim/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/batim.png",
+    "category": "Horror"
+  },
+  {
+    "id": "burger-and-frights",
+    "title": "Burger & Frights",
+    "url": "https://frog.hpsschools.org/cdn/projects/burger-and-frights/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fnaf1.png",
+    "category": "Horror"
+  },
+  {
+    "id": "minecraft",
+    "title": "Minecraft",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/minecraft/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/minecraft.jpg",
+    "category": "Adventure"
+  },
+  {
+    "id": "hollow-knight",
+    "title": "Hollow Knight",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/hollowknight/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/hollow.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "raft",
+    "title": "Raft",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/raft/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/raft.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "undertale",
+    "title": "Undertale",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/undertale/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/undertale.jpg",
+    "category": "Adventure"
+  },
+  {
+    "id": "deltarune",
+    "title": "Deltarune",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/deltarune/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/deltarune.jpg",
+    "category": "Adventure"
+  },
+  {
+    "id": "omori",
+    "title": "Omori",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/omori/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/omori.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "oneshot",
+    "title": "OneShot",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/oneshot/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/oneshot.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "terraria",
+    "title": "Terraria",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/terraria/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/terraria.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "slime-rancher",
+    "title": "Slime Rancher",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/slimerancher/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/slimerancher.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "getting-over-it",
+    "title": "Getting Over It",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/gettingoverit/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gettingoverit.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "adgac",
+    "title": "A Difficult Game About Climbing",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/adgac/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/adgac.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "delta-traveler",
+    "title": "Delta Traveler",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/deltatraveler/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/deltatraveler.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "raldi",
+    "title": "Raldi's Crackhouse",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/raldi/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/raldi.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "pizza-tower",
+    "title": "Pizza Tower",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/pizzatower/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ppg.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "sonic-mania",
+    "title": "Sonic Mania",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/sonicmania/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sonicmania.jpg",
+    "category": "Adventure"
+  },
+  {
+    "id": "mcpe",
+    "title": "Minecraft Pocket Edition",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mcpe/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/mcpe.png",
+    "category": "Adventure"
+  },
+  {
+    "id": "a-dance-of-fire-and-ice",
+    "title": "A Dance of Fire and Ice",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/a-dance-of-fire-and-ice",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/adofai.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "rhythm-hell",
+    "title": "Rhythm Hell",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/rhythm-hell",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/rhythmhell.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "cannon-basketball-4",
+    "title": "Cannon Basketball 4",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/cannon-basketball-4",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cannonbasketball4.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "dragon-vs-bricks",
+    "title": "Dragon vs Icy Bricks",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/dragon-vs-bricks",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/dragondeeznuts.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "dodge",
+    "title": "Dodge",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/dodge",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/dodge.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "100ng",
+    "title": "100 Player Pong",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/100ng",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/100ng.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "portal-flash",
+    "title": "Portal: The Flash Version",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/portal.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/portal.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "diggy",
+    "title": "Diggy",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/diggy.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/diggy.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "peggle",
+    "title": "Peggle",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/peggle.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/peggle.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "bloons-td-1",
+    "title": "Bloons Tower Defense",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/bloons-td-1.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bloons.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "bloons-td-2",
+    "title": "Bloons Tower Defense 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/bloons-td-2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bloons2.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "avalanche",
+    "title": "Avalanche",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/avalanche.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/avalanche.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "achievement-unlocked",
+    "title": "Achievement Unlocked",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/achunlocked.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/au.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "balatro",
+    "title": "Balatro",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/balatro/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/balatro.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "testimonium",
+    "title": "Testimonium",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/testimonium",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/testimonium.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "dnttch",
+    "title": "Do Not Take This Cat Home",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/dnttch",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/dnttch.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "fused240",
+    "title": "Fused 240",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/fused240",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/fused240.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "bad-game",
+    "title": "Bad Game",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/badgame",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/badgame.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "karlson2d",
+    "title": "Karlson 2D",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/karlson2d",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/karlson.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "block-blast",
+    "title": "Block Blast",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/blockblast/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/100ng.jpg",
+    "category": "Puzzle"
+  },
+  {
+    "id": "cookie-clicker",
+    "title": "Cookie Clicker",
+    "url": "https://frog.hpsschools.org/cdn/projects/cookie-clicker/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cookieclicker.png",
+    "category": "Puzzle"
+  },
+  {
+    "id": "bitlife",
+    "title": "BitLife",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/bitlife",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/bitlife.jpg",
+    "category": "Simulation"
+  },
+  {
+    "id": "monkey-mart",
+    "title": "Monkey Mart",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/monkey-mart",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/monkey-mart.jpg",
+    "category": "Simulation"
+  },
+  {
+    "id": "repo",
+    "title": "R.E.P.O",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/repo/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ppg.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "people-playground",
+    "title": "People Playground",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/ppgbog/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ppg.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "gorilla-tag",
+    "title": "Gorilla Tag",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/gtag/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/thetag.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "gacha-life",
+    "title": "Gacha Life",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/gachalife.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gachalife.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "gacha-verse",
+    "title": "Gacha Verse",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/gachaverse.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gachaverse.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "ddlc-plus",
+    "title": "Doki Doki Literature Club+",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/ddlcplus/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ddlcplus.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "nso",
+    "title": "Needy Streamer Overload",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/nso/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/nso.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "papas-pizzeria",
+    "title": "Papa's Pizzeria",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/flash/game/papa/example/pizzeria.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/papas.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "little-big-planet",
+    "title": "Little Big Planet",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/lbp/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/lbp.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "we-become-what-we-behold",
+    "title": "We Become What We Behold",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/wbwwb/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/baconmaydie.jpg",
+    "category": "Simulation"
+  },
+  {
+    "id": "class-of-09",
+    "title": "Class of '09",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/co09loader/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/classof09.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "angry-birds",
+    "title": "Angry Birds",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/angrybirds/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/angrybirds.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "subway-surfers",
+    "title": "Subway Surfers",
+    "url": "https://frog.hpsschools.org/cdn/projects/subway-surfers/",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/subway.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "danganronpa",
+    "title": "Danganronpa: Trigger Happy Havoc",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/danganronpa/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/danganronpa.png",
+    "category": "Simulation"
+  },
+  {
+    "id": "house-of-hazards",
+    "title": "House of Hazards",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/houseofhazards/index.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/houseofhazards.png",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "slither-io",
+    "title": "Slither.io",
+    "url": "https://slither.io",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/survivorio.png",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "skribbl-io",
+    "title": "Skribbl.io",
+    "url": "https://skribbl.io",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/dodge.png",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "uno",
+    "title": "UNO",
+    "url": "https://buddyboardgames.com/uno",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cannonbasketball4.jpg",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "sm64",
+    "title": "Super Mario 64",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sm64.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sm64.png",
+    "category": "Classic"
+  },
+  {
+    "id": "banjo-kazooie",
+    "title": "Banjo-Kazooie",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/banjo.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/banjo.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "ssb",
+    "title": "Super Smash Bros",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/ssb.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ssb.png",
+    "category": "Classic"
+  },
+  {
+    "id": "zelda-oot",
+    "title": "Zelda: Ocarina of Time",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/zelda-oot.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/lozoft.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "south-park-64",
+    "title": "South Park 64",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/south.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/southpark.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "animal-crossing-ww",
+    "title": "Animal Crossing: Wild World",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/acww.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/acww.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "nsmb-ds",
+    "title": "New Super Mario Bros DS",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/nsmb.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/nsmb.png",
+    "category": "Classic"
+  },
+  {
+    "id": "pokemon-platinum",
+    "title": "Pokemon Platinum",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/pokemon.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/ppv.png",
+    "category": "Classic"
+  },
+  {
+    "id": "mario-kart-ds",
+    "title": "Mario Kart DS",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/mkds.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/mkds.png",
+    "category": "Classic"
+  },
+  {
+    "id": "cooking-mama",
+    "title": "Cooking Mama",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/cookingmama.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cookingmama.png",
+    "category": "Classic"
+  },
+  {
+    "id": "cooking-mama-2",
+    "title": "Cooking Mama 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/cookingmama2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cookingmama2.png",
+    "category": "Classic"
+  },
+  {
+    "id": "cooking-mama-3",
+    "title": "Cooking Mama 3",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/cookingmama3.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/cookingmama3.png",
+    "category": "Classic"
+  },
+  {
+    "id": "tomodachi",
+    "title": "Tomodachi Collection",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/tomodachi.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/tomodachi.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "smbd",
+    "title": "Super Mario Bros Deluxe",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/smbd.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/smbd.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "zelda-ladx",
+    "title": "Zelda: Link's Awakening DX",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/links_awakening.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/lozladx.png",
+    "category": "Classic"
+  },
+  {
+    "id": "smb",
+    "title": "Super Mario Bros",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/smb.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/smb.png",
+    "category": "Classic"
+  },
+  {
+    "id": "kirby-super-star",
+    "title": "Kirby Super Star",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/kirbysuperstar.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/kirbyss.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "smw",
+    "title": "Super Mario World",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/smw.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/smw.png",
+    "category": "Classic"
+  },
+  {
+    "id": "smas",
+    "title": "Super Mario All Stars",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/smballstars.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/smas.png",
+    "category": "Classic"
+  },
+  {
+    "id": "sonic-1",
+    "title": "Sonic the Hedgehog",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sonic1.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sonic1.png",
+    "category": "Classic"
+  },
+  {
+    "id": "sonic-2",
+    "title": "Sonic the Hedgehog 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sonic2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sonic2.png",
+    "category": "Classic"
+  },
+  {
+    "id": "sonic-3",
+    "title": "Sonic the Hedgehog 3",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sonic3.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sonic3.png",
+    "category": "Classic"
+  },
+  {
+    "id": "sonic-cd",
+    "title": "Sonic CD",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/soniccd.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/soniccd.png",
+    "category": "Classic"
+  },
+  {
+    "id": "advance-wars",
+    "title": "Advance Wars",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/AdvancedWars.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/advancewars.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "sma2",
+    "title": "Super Mario Advance 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sma2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sma2.png",
+    "category": "Classic"
+  },
+  {
+    "id": "sma4",
+    "title": "Super Mario Advance 4",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/sma4.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/sma4.png",
+    "category": "Classic"
+  },
+  {
+    "id": "pokemon-firered",
+    "title": "Pokemon FireRed",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/PokemonFireRed.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/pokemonfirered.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "super-monkey-ball",
+    "title": "Super Monkey Ball Jr",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/super-monkey-ball.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/supermonkeybj.png",
+    "category": "Classic"
+  },
+  {
+    "id": "crash-bandicoot",
+    "title": "Crash Bandicoot",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/crashbandi.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/crashbandi.png",
+    "category": "Classic"
+  },
+  {
+    "id": "gta2",
+    "title": "Grand Theft Auto 2",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/gta2.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/gta2.png",
+    "category": "Classic"
+  },
+  {
+    "id": "spiderman",
+    "title": "Spider-Man",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/spiderman.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/spiderman.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "vib-ribbon",
+    "title": "Vib-Ribbon",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/vib-ribbon.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/vib-ribbon.jpg",
+    "category": "Classic"
+  },
+  {
+    "id": "parappa",
+    "title": "PaRappa the Rapper",
+    "url": "https://frog.hpsschools.org/stuff/selfhosted/mexiisamonkey/parappa.html",
+    "thumbnail": "https://frog.hpsschools.org/stuff/games/para.png",
+    "category": "Classic"
+  },
+  {
+    "id": "1v1-lol",
+    "title": "1v1.LOL",
+    "url": "https://1v1.lol/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/1v1_LOL.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "2048",
+    "title": "2048",
+    "url": "https://www.2048.org/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/2048.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "2048-multitasking",
+    "title": "2048 Multitasking",
+    "url": "https://calculatorgames.github.io/simplegimes/2048-multitask/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/2048.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "ball-dodge",
+    "title": "Ball Dodge",
+    "url": "https://3kh0-assets.silvereen.net/3kh0-assets/ball-dodge",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/balldodge.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "3d-dino-game",
+    "title": "3D Dino Game",
+    "url": "https://lagged.com/api/play2/t-rex-3d2/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/3D_Dino_Game.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "60-second-burger-run",
+    "title": "60 Second Burger Run",
+    "url": "https://www.coolmathgames.com/0-60-second-burger-run/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/60_Second_Burger_Run.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "a-dark-room",
+    "title": "A Dark Room",
+    "url": "https://adarkroom.doublespeakgames.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/A_Dark_Room.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "age-of-war",
+    "title": "Age of War",
+    "url": "https://age-of-war.game-files.crazygames.com/ruffle/ageofwar.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Age_of_War.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "basketball-random",
+    "title": "Basketball Random",
+    "url": "https://basketrandomonline.github.io/g8/basket-random/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Basketball_Random.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "glass-city",
+    "title": "Glass City",
+    "url": "https://rpc.lol/games/projects/glass-city/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Glass_City.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "hacker-typer",
+    "title": "Hacker Typer",
+    "url": "https://hackertyper.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hacker_Typer.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "idle-shark-game",
+    "title": "Idle Shark Game",
+    "url": "https://alpha.shark.tobot.dev/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Idle_Shark_Game.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "interactive-buddy",
+    "title": "Interactive Buddy",
+    "url": "https://1kh0.github.io/projects/interactivebuddy/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Interactive_Buddy.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "just-one-boss",
+    "title": "Just One Boss",
+    "url": "https://www.coolmathgames.com/0-just-one-boss/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Just_One_Boss.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "portal-mario",
+    "title": "Portal Mario",
+    "url": "https://tannerrogalsky.com/mari0/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Portal_Mario.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "eaglercraft-v1-8",
+    "title": "Eaglercraft v1.8",
+    "url": "https://mcv18.netlify.app/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Eaglercraft_v1_8.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "eaglercraft-v1-5-2",
+    "title": "Eaglercraft v1.5.2",
+    "url": "https://mcv152.netlify.app/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Eaglercraft_v1_8.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "n-gon",
+    "title": "n-gon",
+    "url": "https://landgreen.github.io/n-gon/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/n_gon.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "paper-io",
+    "title": "Paper.io",
+    "url": "https://paper-io.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Paper_io.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "portal-flash-2",
+    "title": "Portal Flash",
+    "url": "https://1kh0.github.io/projects/portalflash/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Portal_Flash.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "sandspiel",
+    "title": "Sandspiel",
+    "url": "https://sandspiel.club/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sandspiel.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "cryzen",
+    "title": "Cryzen",
+    "url": "https://cryzen.io/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Cryzen.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "deeeep-io",
+    "title": "Deeeep.io",
+    "url": "https://beta.deeeep.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Deeeep_io.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "diep-io",
+    "title": "diep.io",
+    "url": "https://diep.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/diep_io.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "dreader",
+    "title": "Dreader",
+    "url": "https://donitz.itch.io/dreader",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dreader.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "rainbow-tower",
+    "title": "Rainbow Tower",
+    "url": "https://www.mathplayground.com/mobile_rainbow_tower/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Rainbow_Tower.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "gunspin",
+    "title": "Gunspin",
+    "url": "https://static.playunblocked.com/2019/11/gunspin/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Gunspin.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "territorial-io",
+    "title": "Territorial.io",
+    "url": "https://territorial.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Territorial_io.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "madness-haphazard",
+    "title": "Madness: Haphazard",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=3404",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Madness__Haphazard.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "space-plan",
+    "title": "Space Plan",
+    "url": "http://www.jhollands.co.uk/spaceplan/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Space_Plan.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "thisissand",
+    "title": "thisissand",
+    "url": "https://thisissand.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/thisissand.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "shell-shockers",
+    "title": "Shell Shockers",
+    "url": "https://shellshock.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Shell_Shockers.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "temple-of-boom",
+    "title": "Temple of Boom",
+    "url": "https://temple-of-boom.github.io/file/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Temple_of_Boom.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "earn-to-die-2012-p-2",
+    "title": "Earn to Die 2012 P.2",
+    "url": "https://games-online.io/game/EarnToDie/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Earn_to_Die_2012_P_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fnaf-2",
+    "title": "FNAF 2",
+    "url": "https://sussygamedeveloper.github.io/FNAF2/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/FNAF_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fnaf-3",
+    "title": "FNAF 3",
+    "url": "https://sussygamedeveloper.github.io/fnaf3/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/FNAF_3.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "time-shooter-2",
+    "title": "Time Shooter 2",
+    "url": "https://html5.gamedistribution.com/62a72f2da7cb4b609579a47653546e6a/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Time_Shooter_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "haunt-the-house",
+    "title": "Haunt the House",
+    "url": "https://w8.snokido.com/games/flash/ruffle.html?g=haunt-the-house&v=231027",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Haunt_the_House.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "strike-force-heros",
+    "title": "Strike Force Heros",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=2194",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Strike_Force_Heros.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "armed-with-wings-3",
+    "title": "Armed with Wings 3",
+    "url": "https://www.silvergames.com/en/armed-with-wings-3/gameframe",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Armed_with_Wings_3.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "amazing-strange-rope-police",
+    "title": "Amazing Strange Rope Police",
+    "url": "https://www.gamearter.com/game/amazing-strange-rope-police-vice-spider-vegas/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Amazing_Strange_Rope_Police.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "n-game",
+    "title": "N-Game",
+    "url": "https://www.numuki.com/gameframe/n-game",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/N_Game.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "bullet-force",
+    "title": "Bullet Force",
+    "url": "https://games.crazygames.com/en_US/bullet-force-multiplayer/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bullet_Force.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "hole-io",
+    "title": "Hole.io",
+    "url": "https://hole-io.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hole_io.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "color-tunnel",
+    "title": "Color Tunnel",
+    "url": "https://f3.silvergames.com/html5/color-tunnel/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Color_Tunnel.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "slice-it-all",
+    "title": "Slice it all",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/efa941135635400f94bdb0b7430a92f4/index.html?gdpr-targeting=1&gd_sdk_referrer_url=https%3A%2F%2Fwww.silvergames.com%2Fen%2Fslice-it-all&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5zaWx2ZXJnYW1lcy5jb20vZW4vc2xpY2UtaXQtYWxsIiwicGFyZW50RG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwidG9wRG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwiaGFzSW1wcmVzc2lvbiI6dHJ1ZSwibG9hZGVyRW5hYmxlZCI6dHJ1ZSwiaG9zdCI6Imh0bWw1LmdhbWVkaXN0cmlidXRpb24uY29tIiwidmVyc2lvbiI6IjEuNS4xNyJ9",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Slice_it_all.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "granny",
+    "title": "Granny",
+    "url": "https://html5.gamemonetize.co/pm5wjn3np4xl59y8ie3a85xqs1m1nyma/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Granny.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "piano-tiles",
+    "title": "Piano Tiles",
+    "url": "https://h5.4j.com/games/Piano-Tiles-2-Online/index.html?pubid=silvergames&v=1503580918",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Piano_Tiles.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "raze",
+    "title": "Raze",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=4195",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Raze.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "intrusion",
+    "title": "Intrusion",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=2278",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Intrusion.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "death-run-3d",
+    "title": "Death Run 3D",
+    "url": "https://mathgames66.github.io/games/html5/deathrun3d/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Death_Run_3D.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-3",
+    "title": "Vex 3",
+    "url": "https://html5.gamedistribution.com/762c932b4db74c6da0c1d101b2da8be6/?timestamp=1713731401&countryCode=en&siteLocale=en&locale=en&gd_sdk_referrer_url=https%3A%2F%2Fkizi.com%2Fgames%2Fvex-3",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_3.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-4",
+    "title": "Vex 4",
+    "url": "https://html5.gamedistribution.com/80e6a5ae477f4d4fbcd1ea293d10087d/?timestamp=1713731551&countryCode=en&siteLocale=en&locale=en&gd_sdk_referrer_url=https%3A%2F%2Fkizi.com%2Fgames%2Fvex-4",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_4.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-5",
+    "title": "Vex 5",
+    "url": "https://html5.gamedistribution.com/f120262ab72743039fbce88c1f370df8/?timestamp=1713731604&countryCode=en&siteLocale=en&locale=en&gd_sdk_referrer_url=https%3A%2F%2Fkizi.com%2Fgames%2Fvex-5",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_5.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-6",
+    "title": "Vex 6",
+    "url": "https://html5.gamedistribution.com/4925e12574364121a48c61c35f649c36/?timestamp=1713731635&countryCode=en&siteLocale=en&locale=en&gd_sdk_referrer_url=https%3A%2F%2Fkizi.com%2Fgames%2Fvex-6",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_6.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-7",
+    "title": "Vex 7",
+    "url": "https://html5.gamedistribution.com/0c454c9562d249d28ba3a2b50564042c/?timestamp=1713731659&countryCode=en&siteLocale=en&locale=en&gd_sdk_referrer_url=https%3A%2F%2Fkizi.com%2Fgames%2Fvex-7",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_7.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "backrooms",
+    "title": "Backrooms",
+    "url": "https://backroomsgame.io/game/backrooms/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Backrooms.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "toss-the-turle",
+    "title": "Toss the Turle",
+    "url": "https://kdata1.com/RS/game.php?r=https://kdata1.com/2024/02/tosstheturtle_0.swf&w=900&h=563&warnsupport=true",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Toss_the_Turle.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "binding-of-issac",
+    "title": "Binding of Issac",
+    "url": "https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2011/10/binding-of-issac.swf&w=800&h=600&warnsupport=true",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Binding_of_Issac.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "ultimate-car-driving-simulator",
+    "title": "Ultimate Car Driving Simulator",
+    "url": "https://app-258100.games.s3.yandex.net/258100/tjl3zpx5pqgflpnp9trchxb110lsyvvz/index.html?is-united-page=1&skip-guard=1&header=no&clid=2818308&flags=%7B%22adv_sticky_banner_disabled%22%3Atrue%7D&sdk=%2Fsdk%2F_%2Fv2.40602063910d0212bbe3.js#origin=https%3A%2F%2Fyandex.com&app-id=258100&device-type=desktop",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Ultimate_Car_Driving_Simulator.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "madalin-cars-multiplayer",
+    "title": "Madalin Cars Multiplayer",
+    "url": "https://f.kbhgames.com/2018/03/madalin-cars-multiplayer/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Madalin_Cars_Multiplayer.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "deadshot-io",
+    "title": "Deadshot.io",
+    "url": "https://deadshot.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Deadshot_io.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stick-slasher",
+    "title": "Stick Slasher",
+    "url": "https://kdata1.com/2023/03/stickslasher/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stick_Slasher.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "basketbros-io",
+    "title": "Basketbros.io",
+    "url": "https://kdata1.com/2023/03/stickslasher/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Basketbros_io.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fancy-pants-adventure-world-2",
+    "title": "Fancy Pants Adventure: World 2",
+    "url": "https://kdata1.com/2022/12/fancy-pants-adventure-3/?kbhgames",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Fancy_Pants_Adventure__World_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fancy-pants-adventure-world-1",
+    "title": "Fancy Pants Adventure: World 1",
+    "url": "https://kbhgames.com/game/fancy-pants-adventures",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Fancy_Pants_Adventure__World_1.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "jetpack-joyride",
+    "title": "Jetpack Joyride",
+    "url": "https://kdata1.com/2024/02/jetpack-joyride/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Jetpack_Joyride.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "station-meltdown",
+    "title": "Station Meltdown",
+    "url": "https://kdata1.com/2022/03/station-meltdown/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Station_Meltdown.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "what-remains",
+    "title": "What Remains",
+    "url": "https://kdata1.com/2021/07/3911393/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/What_Remains.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "plazma-burst",
+    "title": "Plazma Burst",
+    "url": "https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/plazma-burst.swf&w=1000&h=500&warnsupport=true",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Plazma_Burst.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "count-secure-operations-2",
+    "title": "Count Secure Operations 2",
+    "url": "https://app-256471.games.s3.yandex.net/256471/gctqmljj6yn6nvurax636mu4hme5gsqz/index.html?is-united-page=1&skip-guard=1&header=no&clid=2818308&flags=%7B%22adv_sticky_banner_disabled%22%3Atrue%7D&sdk=%2Fsdk%2F_%2Fv2.40602063910d0212bbe3.js#origin=https%3A%2F%2Fyandex.com&app-id=256471&device-type=desktop",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Count_Secure_Operations_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "10-103",
+    "title": "10-103",
+    "url": "https://kdata1.com/2020/12/3100528/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/10_103.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "10-103-null-kevin",
+    "title": "10-103: Null Kevin",
+    "url": "https://kdata1.com/2021/06/4056473/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/10_103__Null_Kevin.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "last-hope",
+    "title": "Last Hope",
+    "url": "https://kdata1.com/2021/09/LastHope/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Last_Hope.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "make-sure-it-s-closed",
+    "title": "Make sure it's closed",
+    "url": "https://kdata1.com/2019/04/MSIC-WEBGL/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Make_sure_it_s_closed.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "gun-knight",
+    "title": "Gun Knight",
+    "url": "https://stepford.itch.io/gun-knight",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Gun_Knight.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mob-inc",
+    "title": "Mob Inc",
+    "url": "https://html-classic.itch.zone/html/1796576/index.html?v=1577643878",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mob_Inc.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "black-resin",
+    "title": "Black Resin",
+    "url": "https://html-classic.itch.zone/html/6957140/BR_WEBGL_NO_WRONG_DRONG/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Black_Resin.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "feedvid-live",
+    "title": "Feedvid Live",
+    "url": "https://html-classic.itch.zone/html/4941980-683813/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Feedvid_Live.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fnaf-1-scratch",
+    "title": "FNAF 1 (Scratch)",
+    "url": "https://run3.io/popgame/fnaf/fnaf1/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/FNAF_1__Scratch_.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fnaf-4-scratch",
+    "title": "FNAF 4 (Scratch)",
+    "url": "https://ubg98.github.io/FNAF4/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/FNAF_4__Scratch_.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stumble-guys",
+    "title": "Stumble Guys",
+    "url": "https://www.stumbleguys.com/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stumble_Guys.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "pokemon-emerald",
+    "title": "Pokemon Emerald",
+    "url": "https://f.kbhgames.com/emujs/play.php?c=gba&f=pokemon-emerald.gba",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Pokemon_Emerald.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vex-8",
+    "title": "Vex 8",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/949009d40a2846f89f887de2285d6c28/index.html?gd_sdk_referrer_url=https%3A%2F%2Farcadespot.com%2Fgame%2Fvex-8&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL2FyY2FkZXNwb3QuY29tL2dhbWUvdmV4LTgiLCJwYXJlbnREb21haW4iOiJhcmNhZGVzcG90LmNvbSIsInRvcERvbWFpbiI6ImFyY2FkZXNwb3QuY29tIiwiaGFzSW1wcmVzc2lvbiI6dHJ1ZSwibG9hZGVyRW5hYmxlZCI6dHJ1ZSwiaG9zdCI6Imh0bWw1LmdhbWVkaXN0cmlidXRpb24uY29tIiwidmVyc2lvbiI6IjEuNS4xNyJ9",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vex_8.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "precision-client",
+    "title": "Precision Client",
+    "url": "https://html-classic.itch.zone/html/7086310/PrecisionClient-Static-main/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Precision_Client.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "idle-breakout",
+    "title": "Idle Breakout",
+    "url": "https://www.coolmathgames.com/0-idle-breakout/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Idle_Breakout.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "twitch-tetris",
+    "title": "Twitch Tetris",
+    "url": "https://www.rossipotti.de/ausgabe28/tetris/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Twitch_Tetris.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mario-kart-64",
+    "title": "Mario Kart 64",
+    "url": "https://f.kbhgames.com/r/n64/game.php?file=mario-kart-64.zip",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mario_Kart_64.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "shuttle-lol",
+    "title": "Shuttle.lol",
+    "url": "https://shuttle.lol",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Shuttle_lol.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stick-archers-battle",
+    "title": "Stick Archers Battle",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/a2eafb6bfed84d56a10d6c57e1e72417/index.html?gd_sdk_referrer_url=https%3A%2F%2Fwww.twoplayergames.org%2Fgame%2Fstick-archers-battle&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy50d29wbGF5ZXJnYW1lcy5vcmcvZ2FtZS9zdGljay1hcmNoZXJzLWJhdHRsZSIsInBhcmVudERvbWFpbiI6InR3b3BsYXllcmdhbWVzLm9yZyIsInRvcERvbWFpbiI6InR3b3BsYXllcmdhbWVzLm9yZyIsImhhc0ltcHJlc3Npb24iOmZhbHNlLCJsb2FkZXJFbmFibGVkIjp0cnVlLCJob3N0IjoiaHRtbDUuZ2FtZWRpc3RyaWJ1dGlvbi5jb20iLCJ2ZXJzaW9uIjoiMS41LjE3In0%253D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stick_Archers_Battle.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "funny-shooter-2",
+    "title": "Funny Shooter 2",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/a1b7ac4025214a5cb0bd01a4f675513a/index.html?gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL2Z1bm55c2hvb3RlcjIuY29tLyIsInBhcmVudERvbWFpbiI6ImZ1bm55c2hvb3RlcjIuY29tIiwidG9wRG9tYWluIjoiZnVubnlzaG9vdGVyMi5jb20iLCJoYXNJbXByZXNzaW9uIjpmYWxzZSwibG9hZGVyRW5hYmxlZCI6dHJ1ZSwiaG9zdCI6Imh0bWw1LmdhbWVkaXN0cmlidXRpb24uY29tIiwidmVyc2lvbiI6IjEuNS4xNyJ9",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Funny_Shooter_2.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "exit-path",
+    "title": "Exit Path",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=606",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Exit_Path.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "awesome-planes",
+    "title": "Awesome Planes",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=2017",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Awesome_Planes.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "ovo-2",
+    "title": "OvO 2",
+    "url": "https://dedragames.com/games/ovo2/0.2alpha/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/OvO_2.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "60-seconds",
+    "title": "60 Seconds",
+    "url": "https://www.puzzlegame.com/games/60-Seconds-Atomic-Adventure/index.html?yad",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/60_Seconds.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "buildnow-gg",
+    "title": "BuildNow GG",
+    "url": "https://games.crazygames.com/en_US/buildnow-gg/index.html?v=1.282",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/BuildNow_GG.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "sans-fight",
+    "title": "Sans Fight",
+    "url": "https://jcw87.github.io/c2-sans-fight/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sans_Fight.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "friday-night-funkin",
+    "title": "Friday night Funkin",
+    "url": "https://uploads.ungrounded.net/alternate/1528000/1528775_alternate_113347_r112.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=6636730d4b7cd&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Friday_night_Funkin.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "baldis-basics-2",
+    "title": "Baldis Basics",
+    "url": "https://en.gameslol.net/data/baldis-basics/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Baldis_Basics.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "assessment-examination",
+    "title": "Assessment Examination",
+    "url": "https://html-classic.itch.zone/html/5392404/Web5/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Assessment_Examination.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "dome-romantik",
+    "title": "Dome Romantik",
+    "url": "https://bippinbits.itch.io/dome-romantik",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dome_Romantik.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "nightclub-showdown",
+    "title": "Nightclub Showdown",
+    "url": "https://html-classic.itch.zone/html/3198875/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Nightclub_Showdown.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "goodnight-meowmie",
+    "title": "Goodnight Meowmie",
+    "url": "https://ddrkirbyisq.itch.io/goodnight-meowmie",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Goodnight_Meowmie.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "blastronaut",
+    "title": "Blastronaut",
+    "url": "https://html-classic.itch.zone/html/2758024/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Blastronaut.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "uzg-cod-zombies",
+    "title": "UZG (COD Zombies)",
+    "url": "https://html-classic.itch.zone/html/5713982/UZG_webgl/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/UZG__COD_Zombies_.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "commonweal",
+    "title": "Commonweal",
+    "url": "https://html-classic.itch.zone/html/10287783/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Commonweal.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "holonomy",
+    "title": "Holonomy",
+    "url": "https://html-classic.itch.zone/html/7959084/Holonomy%20Web/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Holonomy.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "enchain-classic",
+    "title": "Enchain Classic",
+    "url": "https://html-classic.itch.zone/html/793359/Enchain%20WebGL/index.html?v=1542781876",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Enchain_Classic.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "hollow-knight-demake",
+    "title": "Hollow Knight Demake",
+    "url": "https://html-classic.itch.zone/html/4103396/web/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hollow_Knight_Demake.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "dustsim",
+    "title": "Dustsim",
+    "url": "https://kodub.itch.io/dustsim",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dustsim.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "canabalt",
+    "title": "Canabalt",
+    "url": "https://html-classic.itch.zone/html/9680307/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Canabalt.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "home-alone",
+    "title": "Home Alone",
+    "url": "https://html-classic.itch.zone/html/8471641/BGJ%202022.2%20-%20Home%20Alone%20WebGL/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Home_Alone.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "78-hour-rain",
+    "title": "78 Hour Rain",
+    "url": "https://html-classic.itch.zone/html/2937814/78HourRain_Webv1/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/78_Hour_Rain.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "closing-doors",
+    "title": "Closing Doors",
+    "url": "https://collarpill.itch.io/closing-doors",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Closing_Doors.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "backrooms-2d",
+    "title": "Backrooms 2D",
+    "url": "https://html-classic.itch.zone/html/8485327/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Backrooms_2D.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "silhouette-showdown",
+    "title": "Silhouette Showdown",
+    "url": "https://html-classic.itch.zone/html/7362417/SilhouetteShowdown080_HTML/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Silhouette_Showdown.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "commando",
+    "title": "Commando",
+    "url": "https://html-classic.itch.zone/html/1824008/www/index.html?v=1577643784",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Commando.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "hollow-knight-silksong-demake",
+    "title": "Hollow Knight (Silksong Demake)",
+    "url": "https://html-classic.itch.zone/html/4927768/web/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hollow_Knight__Silksong_Demake_.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "nip-for-speed",
+    "title": "Nip for speed",
+    "url": "https://html-classic.itch.zone/html/9641909/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Nip_for_speed.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vacant",
+    "title": "Vacant",
+    "url": "https://html-classic.itch.zone/html/5747771-565757/html/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Vacant.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "deep",
+    "title": "Deep",
+    "url": "https://html-classic.itch.zone/html/3316252/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Deep.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "darkness-in-spaceship",
+    "title": "Darkness in Spaceship",
+    "url": "https://html-classic.itch.zone/html/9272800/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Darkness_in_Spaceship.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "station-141",
+    "title": "Station 141",
+    "url": "https://html-classic.itch.zone/html/3793918/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Station_141.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "pew-pew-live",
+    "title": "Pew Pew Live",
+    "url": "https://pewpew.live/webasm/pewpew.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Pew_Pew_Live.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "marble-race-generator",
+    "title": "Marble Race Generator",
+    "url": "https://html-classic.itch.zone/html/2029874/WebV2/index.html?v=1591302253",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Marble_Race_Generator.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "cats-cradle",
+    "title": "Cats Cradle",
+    "url": "https://georgioklironomos.itch.io/cats-cradle",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Cats_Cradle.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "blackbox",
+    "title": "Blackbox",
+    "url": "https://html-classic.itch.zone/html/3475546/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Blackbox.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "this-is-your-life-now",
+    "title": "This is your life now",
+    "url": "https://html-classic.itch.zone/html/1398515/index.html?v=1574335650",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/This_is_your_life_now.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "hinoken",
+    "title": "Hinoken",
+    "url": "https://html-classic.itch.zone/html/3435599/hinoken_web_1/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hinoken.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "necrobomb",
+    "title": "Necrobomb",
+    "url": "https://html-classic.itch.zone/html/3433821/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Necrobomb.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "rocket-league-2d",
+    "title": "Rocket League 2D",
+    "url": "https://html-classic.itch.zone/html/3325334/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Rocket_League_2D.webp",
+    "category": "Multiplayer"
+  },
+  {
+    "id": "dud",
+    "title": "dud",
+    "url": "https://html-classic.itch.zone/html/10158091/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/dud.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "crater",
+    "title": "Crater",
+    "url": "https://html-classic.itch.zone/html/3300759/CraterWeb/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Crater.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "monolith",
+    "title": "Monolith",
+    "url": "https://html-classic.itch.zone/html/473205/index.html?v=1542781942  ",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Monolith.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "d-a-v-e",
+    "title": "D.A-V.E",
+    "url": "https://html-classic.itch.zone/html/9967430/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/D_A_V_E.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bright-lancer",
+    "title": "Bright Lancer",
+    "url": "https://html-classic.itch.zone/html/3228468/Bright%20Lancer%20Web%20Experimental/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bright_Lancer.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "vscs-i",
+    "title": "VSCS-I",
+    "url": "https://html-classic.itch.zone/html/7627512/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/VSCS_I.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "take-out-the-trash",
+    "title": "Take out the trash",
+    "url": "https://html-classic.itch.zone/html/10334699/takeOutTheTrash/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Take_out_the_trash.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "examination-of-fear",
+    "title": "Examination of Fear",
+    "url": "https://html-classic.itch.zone/html/7312990/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Examination_of_Fear.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "i-am-not-what-remains",
+    "title": "I am not what remains",
+    "url": "https://html-classic.itch.zone/html/2479198/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/I_am_not_what_remains.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "last-train-home",
+    "title": "Last train home",
+    "url": "https://html-classic.itch.zone/html/3300759/CraterWeb/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Last_train_home.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "dodge-slash",
+    "title": "Dodge & Slash",
+    "url": "https://kindanice.itch.io/dodge-and-slash",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dodge___Slash.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "like-them",
+    "title": "Like Them",
+    "url": "https://html-classic.itch.zone/html/2367352/Like%20Them%20Demo%20HTML/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Like_Them.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "agent-pyxel",
+    "title": "Agent Pyxel",
+    "url": "https://html-classic.itch.zone/html/4491958/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Agent_Pyxel.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "a-day-in-the-office",
+    "title": "A Day in the Office",
+    "url": "https://html-classic.itch.zone/html/4268519/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/A_Day_in_the_Office.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "station-saturn",
+    "title": "Station Saturn",
+    "url": "https://html-classic.itch.zone/html/7537780/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Station_Saturn.webp",
+    "category": "Popular"
+  },
+  {
+    "id": "driftr",
+    "title": "DriftR",
+    "url": "https://example.com",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/DriftR.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "synesthesia",
+    "title": "Synesthesia",
+    "url": "https://html-classic.itch.zone/html/6726608/browser/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Synesthesia.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "spectral-slash",
+    "title": "Spectral Slash",
+    "url": "https://kdata1.com/2023/07/spectral-slash/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Spectral_Slash.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "rogue-fable-iii",
+    "title": "Rogue Fable III",
+    "url": "https://cache.armorgames.com/files/games/rogue-fable-iii-18602/index.html?v=1550624919",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Rogue_Fable_III.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "human-or-not",
+    "title": "Human or Not?",
+    "url": "https://humanornot.so/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Human_or_Not_.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "ovo-modded",
+    "title": "OVO Modded",
+    "url": "https://ovo-5yu.pages.dev/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/OVO_Modded.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "smash-karts-io",
+    "title": "Smash Karts.io",
+    "url": "https://smashkarts.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Smash_Karts_io.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "cat-mario",
+    "title": "Cat Mario",
+    "url": "https://kdata1.com/2022/04/cat-marioo/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Cat_Mario.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "rocket-bot-royale",
+    "title": "Rocket Bot Royale",
+    "url": "https://rocketbotroyale.winterpixel.io/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Rocket_Bot_Royale.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "csgo-clicker",
+    "title": "CSGO Clicker",
+    "url": "https://mtsl.dk/csgo/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/CSGO_Clicker.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "arsonate",
+    "title": "Arsonate",
+    "url": "https://html-classic.itch.zone/html/10985323/ARSONATE%20-%20WEBGL_DEMO%20-%2020240722%20-%20RELEASE/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Arsonate.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "moon",
+    "title": "Moon",
+    "url": "https://html.itch.zone/html/10993820/Moon/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Moon.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bullet-bunny",
+    "title": "Bullet Bunny",
+    "url": "https://html-classic.itch.zone/html/8618172/Bullet%20Bunny/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bullet_Bunny.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "v-r-g",
+    "title": "V.R.G.",
+    "url": "https://html.itch.zone/html/10999062/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/V_R_G_.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "everybody-must-die",
+    "title": "Everybody Must Die",
+    "url": "https://html-classic.itch.zone/html/4263236/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Everybody_Must_Die.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "don-t-let-her-in",
+    "title": "Don't Let Her In",
+    "url": "https://html-classic.itch.zone/html/10594372/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Don_t_Let_Her_In.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "monster-battlegrounds",
+    "title": "Monster Battlegrounds",
+    "url": "https://html-classic.itch.zone/html/10505998/Monster%20Battlegrounds%20(v0_3_0)%20html/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Monster_Battlegrounds.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "cuckoo-castle",
+    "title": "Cuckoo Castle",
+    "url": "https://html-classic.itch.zone/html/2315059/CuckooCastle/index.html?v=1591301542",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Cuckoo_Castle.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "the-lesser-evil",
+    "title": "The Lesser Evil",
+    "url": "https://html-classic.itch.zone/html/4604027/TheLesserEvil_Web/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/The_Lesser_Evil.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "flooded-caves",
+    "title": "Flooded Caves",
+    "url": "https://html-classic.itch.zone/html/5535808/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Flooded_Caves.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "subject-26",
+    "title": "Subject 26",
+    "url": "https://html-classic.itch.zone/html/196978/index.html?v=1542782131",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Subject_26.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "proctor",
+    "title": "Proctor",
+    "url": "https://html-classic.itch.zone/html/4833194-484298/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Proctor.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "morphology",
+    "title": "Morphology",
+    "url": "https://html-classic.itch.zone/html/2174003/index.html?v=1591301905",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Morphology.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "torchure",
+    "title": "Torchure",
+    "url": "https://html-classic.itch.zone/html/3473461/Builds/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Torchure.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "hyper-jump",
+    "title": "Hyper Jump",
+    "url": "https://html-classic.itch.zone/html/6364027/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Hyper_Jump.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "void-golf",
+    "title": "Void Golf",
+    "url": "https://html-classic.itch.zone/html/1669372/Void%20Golf%20Web/index.html?v=1574334979",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Void_Golf.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "arena",
+    "title": "Arena",
+    "url": "https://html-classic.itch.zone/html/7053230/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Arena.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "8-ball-pool",
+    "title": "8 Ball Pool",
+    "url": "https://8ballpool.com/en/game",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/8_Ball_Pool.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "google-snake-modded",
+    "title": "Google Snake Modded",
+    "url": "https://googlesnakemods.com/v/current/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Google_Snake_Modded.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "helix-jump",
+    "title": "Helix Jump",
+    "url": "https://helixjumponline.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Helix_Jump.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mutilate-a-doll-2",
+    "title": "Mutilate-a-doll 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=4638",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mutilate_a_doll_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "superfighers-2",
+    "title": "Superfighers 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=6456",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Superfighers_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "pandemic-simulator",
+    "title": "Pandemic Simulator",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/f2a015a45b6443358238a54f8f4a557f/index.html?gdpr-targeting=1&gd_sdk_referrer_url=https%3A%2F%2Fwww.silvergames.com%2Fen%2Fpandemic-simulator&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5zaWx2ZXJnYW1lcy5jb20vZW4vcGFuZGVtaWMtc2ltdWxhdG9yIiwicGFyZW50RG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwidG9wRG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTcifQ%253D%253D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Pandemic_Simulator.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "raze-2",
+    "title": "Raze 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=1594",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Raze_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "strike-force-heros-2",
+    "title": "Strike Force Heros 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=2879",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Strike_Force_Heros_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "strike-force-heros-3",
+    "title": "Strike Force Heros 3",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=5067",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Strike_Force_Heros_3.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "sift-heads-world",
+    "title": "Sift Heads World",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=8950",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sift_Heads_World.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stickman-dismount",
+    "title": "Stickman Dismount",
+    "url": "https://cdn.gamemonetize.com/d2pe3o8rrt57q6mro0vjkor7q0xequ04/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stickman_Dismount.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "sift-heads-cartels",
+    "title": "Sift Heads Cartels",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=3199",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sift_Heads_Cartels.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "cut-the-rope",
+    "title": "Cut the Rope",
+    "url": "https://games.cdn.famobi.com/html5games/c/cut-the-rope/v070/?fg_domain=play.famobi.com&fg_aid=A-SILVERGAMES&fg_uid=4531b37c-a8e0-4a67-9ebd-e8d3190b6277&fg_pid=8a24e5f2-94a8-4593-b4e5-81cc68f524c8&fg_beat=969&original_ref=https%3A%2F%2Fwww.silvergames.com%2F",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Cut_the_Rope.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "give-up-2",
+    "title": "Give Up 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=4717",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Give_Up_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "draw-climber",
+    "title": "Draw Climber",
+    "url": "https://f3.silvergames.com/m/draw-cube/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Draw_Climber.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "n-game-2",
+    "title": "N-Game 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=2987",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/N_Game_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stickman-ragdoll-playground",
+    "title": "Stickman Ragdoll Playground",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/1c0a1c13e443454a9a029c155b957778/index.html?gdpr-targeting=1&gd_sdk_referrer_url=https%3A%2F%2Fwww.silvergames.com%2Fen%2Fstickman-ragdoll-playground&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5zaWx2ZXJnYW1lcy5jb20vZW4vc3RpY2ttYW4tcmFnZG9sbC1wbGF5Z3JvdW5kIiwicGFyZW50RG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwidG9wRG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTcifQ%253D%253D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stickman_Ragdoll_Playground.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stealth-hunter-2",
+    "title": "Stealth Hunter 2",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=1965",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stealth_Hunter_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "castel-wars",
+    "title": "Castel Wars",
+    "url": "https://files.twoplayergames.org/files/games/o1/Castel_Wars/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Castel_Wars.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "castel-wars-modern",
+    "title": "Castel Wars Modern",
+    "url": "https://files.twoplayergames.org/files/games/o1/Castel_Wars_Modern/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Castel_Wars_Modern.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "castel-wars-new-era",
+    "title": "Castel Wars New Era",
+    "url": "https://files.twoplayergames.org/files/games/o1/Castel_Wars_New_Era/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Castel_Wars_New_Era.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "uno-online",
+    "title": "Uno Online",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/f2520bae00624e93a4f4614732fa259e/index.html?gd_sdk_referrer_url=https%3A%2F%2Fwww.twoplayergames.org%2Fgame%2Funo-online&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy50d29wbGF5ZXJnYW1lcy5vcmcvZ2FtZS91bm8tb25saW5lIiwicGFyZW50RG9tYWluIjoidHdvcGxheWVyZ2FtZXMub3JnIiwidG9wRG9tYWluIjoidHdvcGxheWVyZ2FtZXMub3JnIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTcifQ%253D%253D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Uno_Online.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stick-duel-battle-hero",
+    "title": "Stick Duel Battle Hero",
+    "url": "https://files.twoplayergames.org/files/games/o1/Stick_Duel_Battle_Hero/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stick_Duel_Battle_Hero.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "tennis-physics",
+    "title": "Tennis Physics",
+    "url": "https://files.twoplayergames.org/files/games/o1/Tennis_Physics/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/House_of_Hazards.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "pixel-smash-duel",
+    "title": "Pixel Smash Duel",
+    "url": "https://html5.gamedistribution.com/81c5e3e4cae448a5876b1c2e424fd96b/?gd_sdk_referrer_url=https%3A%2F%2Fwww.twoplayergames.org%2Fgame%2Fpixel-smash-duel",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Pixel_Smash_Duel.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fancy-snowboarding",
+    "title": "Fancy Snowboarding",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=10106",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Fancy_Snowboarding.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "line-rider",
+    "title": "Line Rider",
+    "url": "https://www.linerider.com/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Line_Rider.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "leap-of-life",
+    "title": "Leap of Life",
+    "url": "https://html5.gamedistribution.com/rvvASMiM/a3cddb497804491ca590c34ee5fa7339/index.html?gdpr-targeting=1&gd_sdk_referrer_url=https%3A%2F%2Fwww.silvergames.com%2Fen%2Fleap-of-life&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5zaWx2ZXJnYW1lcy5jb20vZW4vbGVhcC1vZi1saWZlIiwicGFyZW50RG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwidG9wRG9tYWluIjoic2lsdmVyZ2FtZXMuY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTcifQ%253D%253D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Leap_of_Life.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "geometry-neon-dash-subzero",
+    "title": "Geometry Neon Dash Subzero",
+    "url": "https://html5.gamedistribution.com/1f37997f4c6845519807e0a335ed1c75/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Geometry_Neon_Dash_Subzero.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "space-waves",
+    "title": "Space Waves",
+    "url": "https://games.crazygames.com/en_US/space-waves/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Space_Waves.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "worlds-hardest-game-3",
+    "title": "Worlds Hardest Game 3",
+    "url": "https://www.coolmathgames.com/0-worlds-hardest-game-3/play",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Worlds_Hardest_Game_3.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bad-dolls-2",
+    "title": "Bad Dolls 2",
+    "url": "https://f3.silvergames.com/m/bad-dolls_v2/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bad_Dolls_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fire-circle",
+    "title": "Fire Circle",
+    "url": "https://f3.silvergames.com/m/fire-circle/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Fire_Circle.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "grandpas-minigun",
+    "title": "Grandpas Minigun",
+    "url": "https://uploads.ungrounded.net/alternate/1773000/1773956_alternate_160158_r103.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a97942d14be&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Grandpas_Minigun.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "seeking-peace-zombeez",
+    "title": "Seeking Peace Zombeez",
+    "url": "https://uploads.ungrounded.net/alternate/5903000/5903058_alternate_273533_r1.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a979cdd610c&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Seeking_Peace_Zombeez.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stealth-optional",
+    "title": "Stealth Optional",
+    "url": "https://uploads.ungrounded.net/alternate/5775000/5775059_alternate_266950_r2.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a987bbcbbc4&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stealth_Optional.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "fruity-tower",
+    "title": "Fruity Tower",
+    "url": "https://uploads.ungrounded.net/alternate/4622000/4622142_alternate_215472_r10.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a98ce60a9a3&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Fruity_Tower.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "armed-with-wings-culmination",
+    "title": "Armed with Wings Culmination",
+    "url": "https://uploads.ungrounded.net/ruffle_wrapper/ruffleembed.html?v=1.0.67&browsermode=default&props=%7B%22ruffle%22%3A%22%2Fruffle_wrapper%2Flib%2Fruffle.js%3F1722140126%22%2C%22public_path%22%3A%22%2Fruffle_wrapper%2Flib%2F%22%2C%22swf%22%3A%22https%3A%2F%2Fuploads.ungrounded.net%2F584000%2F584398_Culmination_coolbuddy_v2.swf%3F1691321603%22%2C%22vars%22%3A%7B%22NewgroundsAPI_PublisherID%22%3A1%2C%22NewgroundsAPI_SandboxID%22%3A%2266a98da258f08%22%2C%22NewgroundsAPI_SessionID%22%3A%22%22%2C%22NewgroundsAPI_UserName%22%3A%22%26lt%3Bdeleted%26gt%3B%22%2C%22NewgroundsAPI_UserID%22%3A0%2C%22ng_username%22%3A%22%26lt%3Bdeleted%26gt%3B%22%7D%2C%22width%22%3A800%2C%22height%22%3A480%2C%22icon%22%3A%22https%3A%2F%2Fpicon.ngfiles.com%2F584000%2Fflash_584398_card.webp%3Ff1679409096%22%2C%22warnOnUnsupportedContent%22%3Afalse%7D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Armed_with_Wings_Culmination.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "armed-with-wings-ashbelt",
+    "title": "Armed with Wings Ashbelt",
+    "url": "https://uploads.ungrounded.net/ruffle_wrapper/ruffleembed.html?v=1.0.67&browsermode=default&props=%7B%22ruffle%22%3A%22%2Fruffle_wrapper%2Flib%2Fruffle.js%3F1722140126%22%2C%22public_path%22%3A%22%2Fruffle_wrapper%2Flib%2F%22%2C%22swf%22%3A%22https%3A%2F%2Fuploads.ungrounded.net%2F782000%2F782748_game.swf%3F1616075212%22%2C%22vars%22%3A%7B%22NewgroundsAPI_PublisherID%22%3A1%2C%22NewgroundsAPI_SandboxID%22%3A%2266a98e02c7e2c%22%2C%22NewgroundsAPI_SessionID%22%3A%22%22%2C%22NewgroundsAPI_UserName%22%3A%22%26lt%3Bdeleted%26gt%3B%22%2C%22NewgroundsAPI_UserID%22%3A0%2C%22ng_username%22%3A%22%26lt%3Bdeleted%26gt%3B%22%7D%2C%22width%22%3A1280%2C%22height%22%3A720%2C%22icon%22%3A%22https%3A%2F%2Fpicon.ngfiles.com%2F782000%2Fflash_782748_card.png%3Ff1614591642%22%2C%22warnOnUnsupportedContent%22%3Afalse%7D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Armed_with_Wings_Ashbelt.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "the-i-of-it",
+    "title": "The I of It",
+    "url": "https://uploads.ungrounded.net/ruffle_wrapper/ruffleembed.html?v=1.0.67&browsermode=default&props=%7B%22ruffle%22%3A%22%2Fruffle_wrapper%2Flib%2Fruffle.js%3F1722140126%22%2C%22public_path%22%3A%22%2Fruffle_wrapper%2Flib%2F%22%2C%22swf%22%3A%22https%3A%2F%2Fuploads.ungrounded.net%2F570000%2F570709_theIofIt_640x400.swf%3F1306330288%22%2C%22vars%22%3A%7B%22NewgroundsAPI_PublisherID%22%3A1%2C%22NewgroundsAPI_SandboxID%22%3A%2266a98e3dc2710%22%2C%22NewgroundsAPI_SessionID%22%3A%22%22%2C%22NewgroundsAPI_UserName%22%3A%22%26lt%3Bdeleted%26gt%3B%22%2C%22NewgroundsAPI_UserID%22%3A0%2C%22ng_username%22%3A%22%26lt%3Bdeleted%26gt%3B%22%7D%2C%22width%22%3A640%2C%22height%22%3A400%2C%22icon%22%3A%22https%3A%2F%2Fpicon.ngfiles.com%2F570000%2Fflash_570709_card.png%3Ff1664325606%22%2C%22warnOnUnsupportedContent%22%3Afalse%7D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/The_I_of_It.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "armed-with-wings-rearmed-trials",
+    "title": "Armed with Wings Rearmed Trials",
+    "url": "https://uploads.ungrounded.net/ruffle_wrapper/ruffleembed.html?v=1.0.67&browsermode=default&props=%7B%22ruffle%22%3A%22%2Fruffle_wrapper%2Flib%2Fruffle.js%3F1722140126%22%2C%22public_path%22%3A%22%2Fruffle_wrapper%2Flib%2F%22%2C%22swf%22%3A%22https%3A%2F%2Fuploads.ungrounded.net%2F682000%2F682880_rearmed-survival.swf%3F1477582558%22%2C%22vars%22%3A%7B%22NewgroundsAPI_PublisherID%22%3A1%2C%22NewgroundsAPI_SandboxID%22%3A%2266a991c001117%22%2C%22NewgroundsAPI_SessionID%22%3A%22%22%2C%22NewgroundsAPI_UserName%22%3A%22%26lt%3Bdeleted%26gt%3B%22%2C%22NewgroundsAPI_UserID%22%3A0%2C%22ng_username%22%3A%22%26lt%3Bdeleted%26gt%3B%22%7D%2C%22width%22%3A960%2C%22height%22%3A540%2C%22icon%22%3A%22https%3A%2F%2Fpicon.ngfiles.com%2F682000%2Fflash_682880_card.png%3Ff1691322341%22%2C%22warnOnUnsupportedContent%22%3Afalse%7D",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Armed_with_Wings_Rearmed_Trials.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bunny-bun",
+    "title": "Bunny Bun",
+    "url": "https://uploads.ungrounded.net/alternate/1524000/1524514_alternate_251347_r26.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a994378fd7d&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bunny_Bun.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "dark-sword-light-of-ainn",
+    "title": "Dark Sword: Light of Ainn",
+    "url": "https://uploads.ungrounded.net/alternate/5580000/5580932_alternate_257601_r8.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a9951709f9b&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dark_Sword__Light_of_Ainn.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "dark-sword",
+    "title": "Dark Sword",
+    "url": "https://uploads.ungrounded.net/alternate/4465000/4465067_alternate_208055_r41.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a9965971fd6&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Dark_Sword.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "parking-ticket-mayhem",
+    "title": "Parking Ticket Mayhem",
+    "url": "https://uploads.ungrounded.net/alternate/5144000/5144516_alternate_238037_r1.zip/?NewgroundsAPI_PublisherID=1&NewgroundsAPI_SandboxID=66a9959e79ce0&NewgroundsAPI_SessionID=&NewgroundsAPI_UserName=%26lt%3Bdeleted%26gt%3B&NewgroundsAPI_UserID=0&ng_username=%26lt%3Bdeleted%26gt%3B",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Parking_Ticket_Mayhem.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "sans-last-breath",
+    "title": "Sans Last Breath",
+    "url": "https://mario1d240.github.io/undertale-last-breath-remake-bad-time-simulator",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sans_Last_Breath.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "falling-art-ragdoll-simulator",
+    "title": "Falling Art Ragdoll Simulator",
+    "url": "https://games.crazygames.com/en_US/falling-art-ragdoll-simulator/index.html",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Falling_Art_Ragdoll_Simulator.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "zombie-survival-v2",
+    "title": "Zombie Survival v2",
+    "url": "https://f3.silvergames.com/html5/zombie-survival_v2/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Zombie_Survival_v2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "lonewolf",
+    "title": "Lonewolf",
+    "url": "https://f.silvergames.com/ruffle/player.php?id=5668",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Lonewolf.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "evo-f4",
+    "title": "Evo-F4",
+    "url": "https://www.gamearter.com/game/evo-f4/",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Evo_F4.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "pixel-warfare",
+    "title": "Pixel Warfare",
+    "url": "https://games.crazygames.com/en_US/pixel-warfare/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Pixel_Warfare.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mine-shooter-save-your-world",
+    "title": "Mine Shooter - Save your world",
+    "url": "https://games.crazygames.com/en_US/mine-shooter---save-your-world/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mine_Shooter___Save_your_world.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bodycamera-shooter",
+    "title": "Bodycamera Shooter",
+    "url": "https://games.crazygames.com/en_US/bodycamera-shooter/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bodycamera_Shooter.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "bank-robbery-3",
+    "title": "Bank Robbery 3",
+    "url": "https://games.crazygames.com/en_US/bank-robbery-3/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Bank_Robbery_3.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "sniper-shot-bullet-time",
+    "title": "Sniper Shot - Bullet Time",
+    "url": "https://games.crazygames.com/en_US/sniper-shot-bullet-time/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sniper_Shot___Bullet_Time.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "spy-highway",
+    "title": "Spy Highway",
+    "url": "https://games.crazygames.com/en_US/shotgun-highway/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Spy_Highway.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "save-the-hostages",
+    "title": "Save the Hostages",
+    "url": "https://games.crazygames.com/en_US/save-the-hostages/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Burger___Frights.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "zombie-shooter-part-2",
+    "title": "Zombie Shooter: Part 2",
+    "url": "https://games.crazygames.com/en_US/zombies-shooter-part-2/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Zombie_Shooter__Part_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "sandbox-city",
+    "title": "Sandbox City",
+    "url": "https://games.crazygames.com/en_US/sandbox-city---cars-zombies-ragdolls/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Sandbox_City.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "resident-zombies-horror-shooter",
+    "title": "Resident Zombies: Horror Shooter",
+    "url": "https://games.crazygames.com/en_US/resident-zombies---horror-shooter/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Resident_Zombies__Horror_Shooter.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stickman-zombie-annihilation",
+    "title": "Stickman Zombie Annihilation",
+    "url": "https://games.crazygames.com/en_US/stickman-zombie-annihilation/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stickman_Zombie_Annihilation.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "deadly-red-spikes",
+    "title": "Deadly Red Spikes",
+    "url": "https://games.crazygames.com/en_US/deadly-red-spikes/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Deadly_Red_Spikes.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "crazy-stunt-cars-multiplayer",
+    "title": "Crazy Stunt Cars Multiplayer",
+    "url": "https://games.crazygames.com/en_US/crazy-stunt-cars-multiplayer/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Crazy_Stunt_Cars_Multiplayer.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "supreme-bomb-tag",
+    "title": "Supreme Bomb Tag",
+    "url": "https://games.crazygames.com/en_US/supreme-bomb-tag/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Supreme_Bomb_Tag.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mini-caps-arena",
+    "title": "Mini-Caps: Arena",
+    "url": "https://games.crazygames.com/en_US/mini-caps-arena/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mini_Caps__Arena.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "mini-caps-bombs",
+    "title": "Mini-Caps: Bombs",
+    "url": "https://games.crazygames.com/en_US/mini-caps-bombs/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Mini_Caps__Bombs.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "stickman-zombie-annihilation-2",
+    "title": "Stickman Zombie Annihilation 2",
+    "url": "https://games.crazygames.com/en_US/stickman-annihilation-2/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Stickman_Zombie_Annihilation_2.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "derby-crash-5",
+    "title": "Derby Crash 5",
+    "url": "https://games.crazygames.com/en_US/derby-crash-5/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Derby_Crash_5.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "night-city-racing",
+    "title": "Night City Racing",
+    "url": "https://games.crazygames.com/en_US/night-city-racing/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Night_City_Racing.webp",
+    "category": "Arcade"
+  },
+  {
+    "id": "crazy-for-speed",
+    "title": "Crazy for Speed",
+    "url": "https://games.crazygames.com/en_US/crazy-for-speed/index.html?v=1.295",
+    "thumbnail": "https://math.schoolforlife.online/assets/imgs/g/Crazy_for_Speed.webp",
+    "category": "Arcade"
+  }
+];
+const APPS = [
+  { "id": "docs", "title": "Google Docs", "url": "https://docs.google.com", "thumbnail": "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico", "category": "Productivity" },
+  { "id": "sheets", "title": "Google Sheets", "url": "https://sheets.google.com", "thumbnail": "https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico", "category": "Productivity" },
+  { "id": "slides", "title": "Google Slides", "url": "https://slides.google.com", "thumbnail": "https://ssl.gstatic.com/docs/presentations/images/favicon5.ico", "category": "Productivity" },
+  { "id": "desmos", "title": "Desmos", "url": "https://www.desmos.com/calculator", "thumbnail": "https://www.desmos.com/favicon.ico", "category": "Tools" },
+  { "id": "youtube", "title": "YouTube", "url": "https://www.youtube.com", "thumbnail": "https://www.youtube.com/favicon.ico", "category": "Media" },
+  { "id": "discord", "title": "Discord", "url": "https://discord.com/app", "thumbnail": "https://discord.com/assets/favicon.ico", "category": "Social" },
+  { "id": "spotify", "title": "Spotify", "url": "https://open.spotify.com", "thumbnail": "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png", "category": "Media" },
+  { "id": "reddit", "title": "Reddit", "url": "https://www.reddit.com", "thumbnail": "https://www.redditstatic.com/favicon.ico", "category": "Social" },
+  { "id": "github", "title": "GitHub", "url": "https://github.com", "thumbnail": "https://github.githubassets.com/favicons/favicon.svg", "category": "Tools" },
+  { "id": "wikipedia", "title": "Wikipedia", "url": "https://www.wikipedia.org", "thumbnail": "https://www.wikipedia.org/static/favicon/wikipedia.ico", "category": "Tools" },
+  { "id": "translate", "title": "Google Translate", "url": "https://translate.google.com", "thumbnail": "https://ssl.gstatic.com/translate/favicon.ico", "category": "Tools" },
+  { "id": "khanacademy", "title": "Khan Academy", "url": "https://www.khanacademy.org", "thumbnail": "https://www.khanacademy.org/favicon.ico", "category": "Productivity" }
+];
+
+const THEME_KEY = "velcro_standalone_theme";
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  const icon = document.getElementById("themeToggle")?.querySelector(".material-symbols-rounded");
+  if (icon) icon.textContent = t === "light" ? "dark_mode" : "light_mode";
+}
+applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
+
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById("view-" + name).classList.add("active");
+  document.querySelectorAll(".site-nav a[data-view]").forEach(a => a.classList.toggle("active", a.dataset.view === name));
+}
+document.querySelectorAll(".site-nav a[data-view]").forEach(a => a.addEventListener("click", () => showView(a.dataset.view)));
+
+function buildCard(item, launchFn) {
+  const a = document.createElement("a");
+  a.className = "game-card";
+  a.href = "javascript:void(0)";
+  const cover = document.createElement("span");
+  cover.className = "cover";
+  cover.style.backgroundImage = "url('" + item.thumbnail + "')";
+  const info = document.createElement("span");
+  info.className = "info";
+  const name = document.createElement("span");
+  name.className = "name";
+  name.textContent = item.title;
+  const cat = document.createElement("span");
+  cat.className = "cat";
+  cat.textContent = item.category || "";
+  info.appendChild(name); info.appendChild(cat);
+  a.appendChild(cover); a.appendChild(info);
+  a.addEventListener("click", () => launchFn(item));
+  return a;
+}
+
+const gamesGrid = document.getElementById("gamesGrid");
+const gamesSearch = document.getElementById("gamesSearch");
+document.getElementById("gameCount").textContent = GAMES.length + " games";
+function renderGames() {
+  const q = gamesSearch.value.trim().toLowerCase();
+  gamesGrid.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  GAMES.filter(g => !q || g.title.toLowerCase().includes(q)).slice(0, 200).forEach(g => {
+    frag.appendChild(buildCard(g, item => launchGame(item.url.startsWith("/") ? location.origin + item.url : item.url, item.title)));
+  });
+  gamesGrid.appendChild(frag);
+}
+gamesSearch.addEventListener("input", renderGames);
+renderGames();
+
+const appsGrid = document.getElementById("appsGrid");
+APPS.forEach(a => appsGrid.appendChild(buildCard(a, item => launchGame(item.url, item.title))));
+
+const moviesGrid = document.getElementById("moviesGrid");
+const moviesStatus = document.getElementById("moviesStatus");
+const TMDB_KEY = "805a6a6661151cfd3927e1186c1f444e";
+fetch("https://api.themoviedb.org/3/movie/popular?api_key=" + TMDB_KEY + "&page=1")
+  .then(r => r.json())
+  .then(res => {
+    moviesStatus.textContent = "live from api.themoviedb.org, fetched directly from this file";
+    (res.results || []).forEach(m => {
+      moviesGrid.appendChild(buildCard({
+        title: m.title, category: "movie",
+        thumbnail: m.poster_path ? "https://image.tmdb.org/t/p/w500" + m.poster_path : ""
+      }, () => window.open("https://www.themoviedb.org/movie/" + m.id, "_blank")));
+    });
+  })
+  .catch(err => { moviesStatus.textContent = "TMDB fetch failed: " + err.message; });
+
+async function waitForActivation(reg) {
+  if (reg.active) return;
+  const sw = reg.installing || reg.waiting;
+  if (!sw) return;
+  await new Promise(res => {
+    sw.addEventListener("statechange", function h() {
+      if (this.state === "activated") { this.removeEventListener("statechange", h); res(); }
+    });
+  });
+}
+
+let proxyReady = false;
+let codec = null;
+async function initScramjet(statusEl) {
+  if (location.protocol === "file:") {
+    statusEl.textContent = "can't init — open this file over http:// (e.g. \"npx serve .\"), not by double-clicking it. service workers are blocked on file:// in every browser.";
+    return;
+  }
+  try {
+    const WISP = "wss://anura.pro/wisp/";
+    const { ScramjetController } = await import("/scramjet/scramjet.bundle.js");
+    const { BareMuxConnection } = await import("/bare-mux/index.mjs");
+    const controller = new ScramjetController({
+      prefix: "/scramjet/",
+      files: { wasm: "/scramjet/scramjet.wasm.wasm", all: "/scramjet/scramjet.all.js", sync: "/scramjet/scramjet.sync.js" },
+    });
+    const existing = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(existing.map(r => r.unregister()));
+    if (existing.length > 0) await new Promise(r => setTimeout(r, 600));
+    await controller.init();
+    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/scramjet/" });
+    await waitForActivation(reg);
+    const conn = new BareMuxConnection("/bare-mux/worker.js");
+    await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
+    codec = { encodeUrl: url => controller.encodeUrl(url) };
+    proxyReady = true;
+    if (statusEl) statusEl.textContent = "proxy ready — using the public wss://anura.pro/wisp/ relay (this file has no server of its own)";
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "proxy init failed: " + err.message;
+  }
+}
+initScramjet(document.getElementById("proxyStatus"));
+
+// --- browser tab (address-bar browsing, separate from the game player) ---
+const proxyFrame = document.getElementById("proxyFrame");
+const urlBar = document.getElementById("urlBar");
+function resolveUrl(input) {
+  const t = input.trim();
+  if (!t) return null;
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.includes(".") && !t.includes(" ")) return "https://" + t;
+  return "https://duckduckgo.com/?q=" + encodeURIComponent(t);
+}
+function browserNavigate(url) {
+  urlBar.value = url;
+  const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
+  if (isLocal) { proxyFrame.src = url; return; }
+  if (!proxyReady) { document.getElementById("proxyStatus").textContent = "proxy still initializing, try again in a sec"; return; }
+  proxyFrame.src = codec.encodeUrl(url);
+}
+document.getElementById("goBtn").addEventListener("click", () => { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); });
+urlBar.addEventListener("keydown", e => { if (e.key === "Enter") { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); } });
+
+// --- game player (dedicated fullscreen overlay, matching game.html) ---
+const gamePlayer = document.getElementById("gamePlayer");
+const gameFrame = document.getElementById("gameFrame");
+const gameLoader = document.getElementById("gameLoader");
+const glDismiss = document.getElementById("glDismiss");
+let loaderHidden = false, loaderTimer = null, dismissTimer = null;
+
+function hideLoader() {
+  if (loaderHidden) return;
+  loaderHidden = true;
+  gameLoader.classList.add("gone");
+  clearTimeout(loaderTimer); clearTimeout(dismissTimer);
+}
+glDismiss.addEventListener("click", hideLoader);
+
+function closePlayer() {
+  gamePlayer.classList.remove("open");
+  document.body.classList.remove("player-open");
+  gameFrame.src = "about:blank";
+}
+document.getElementById("playerBack").addEventListener("click", closePlayer);
+document.getElementById("playerClose").addEventListener("click", closePlayer);
+gameFrame.addEventListener("load", () => { if (gameFrame.src && gameFrame.src !== "about:blank") setTimeout(hideLoader, 250); });
+
+async function launchGame(url, title) {
+  gamePlayer.classList.add("open");
+  document.body.classList.add("player-open");
+  document.getElementById("gameTitle").textContent = title;
+  document.getElementById("glTitle").textContent = title;
+  loaderHidden = false;
+  gameLoader.classList.remove("gone");
+  glDismiss.hidden = true;
+  loaderTimer = setTimeout(hideLoader, 45000);
+  dismissTimer = setTimeout(() => { if (!loaderHidden) glDismiss.hidden = false; }, 8000);
+
+  const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
+  if (isLocal) { gameFrame.src = url; return; }
+  if (!proxyReady) {
+    document.getElementById("glHint").textContent = "proxy still initializing, waiting a moment&hellip;";
+    let tries = 0;
+    while (!proxyReady && tries < 50) { await new Promise(r => setTimeout(r, 100)); tries++; }
+  }
+  if (proxyReady) { gameFrame.src = codec.encodeUrl(url); }
+  else { document.getElementById("glHint").textContent = "proxy failed to initialize — try reloading"; }
+}
+</script>
+</body>
+</html>
