@@ -3961,10 +3961,7 @@ const CLOUD_APPS = [
   { title: "Minecraft", category: "sandbox", thumbnail: "https://nowgg.fun/img/minecraft.png", url: "https://nowgg.fun/apps/aptoide/5874/aptoide.html?deep_link=aptoidesearch://com.mojang.minecrafttrialpe" },
 ];
 const cloudGrid = document.getElementById("cloudGrid");
-CLOUD_APPS.forEach(app => cloudGrid.appendChild(buildCard(app, item => {
-  showView("browser");
-  browserNavigate(item.url);
-})));
+CLOUD_APPS.forEach(app => cloudGrid.appendChild(buildCard(app, item => launchGame(item.url, item.title))));
 
 const moviesGrid = document.getElementById("moviesGrid");
 const moviesStatus = document.getElementById("moviesStatus");
