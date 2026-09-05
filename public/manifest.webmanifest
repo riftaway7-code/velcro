@@ -1,7 +1,7 @@
 {
   "name": "velcro",
   "short_name": "velcro",
-  "start_url": "/home.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0b0b0b",

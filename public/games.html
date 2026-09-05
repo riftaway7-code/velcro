@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>apps — velcro</title>
+<title>games — velcro</title>
 <script src="/theme.js"></script>
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,10 +26,13 @@
 
 <header class="topbar">
   <a href="/" class="brand">velcro</a>
+  <button id="scrollTop" class="scroll-top" type="button" aria-label="Scroll to top">
+    <span class="material-symbols-rounded">arrow_upward</span>
+  </button>
   <nav class="site-nav">
   <a href="/"><span class="material-symbols-rounded">home</span>home</a>
-  <a href="/games.html"><span class="material-symbols-rounded">sports_esports</span>games</a>
-  <a href="/apps.html" class="active"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/games.html" class="active"><span class="material-symbols-rounded">sports_esports</span>games</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
   <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
   <a href="/cloud-gaming.html"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
   <a href="/chat.html"><span class="material-symbols-rounded">forum</span>chat</a>
@@ -37,8 +40,8 @@
   <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
   <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
   <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
-  <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
-  <a href="/account.html"><span class="material-symbols-rounded">person</span>account</a>
+    <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
+<a href="/account.html"><span class="material-symbols-rounded">person</span>account</a>
   <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
   </nav>
   <div class="topbar-right">
@@ -46,25 +49,56 @@
       <span class="material-symbols-rounded search-icon">search</span>
       <input id="searchInput" class="search-input" type="text" placeholder="search" autocomplete="off" />
     </div>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+      <span class="material-symbols-rounded">dark_mode</span>
+    </button>
   </div>
 </header>
 
 <main>
   <section class="hero">
-    <h1>apps</h1>
-    <p class="tagline">other useful sites, tunneled the same way</p>
+    <h1>velcro</h1>
+    <p class="tagline"><span id="typingText"></span><span class="caret" aria-hidden="true"></span></p>
+    <div class="user-stats" id="userStats">
+      <span class="user-stat"><span class="user-dot"></span><span id="activeUsersLine">&hellip; online</span></span>
+      <span class="user-stat"><span id="totalUsersLine">&hellip; total</span></span>
+    </div>
+  </section>
+
+  <section class="games-row" id="trendingSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">local_fire_department</span>trending now</h2>
+    <div class="games-grid" id="trendingGrid"></div>
+  </section>
+
+  <section class="games-row" id="favSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">star</span>favorites</h2>
+    <div class="games-grid" id="favGrid"></div>
+  </section>
+
+  <section class="games-row" id="recentSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">history</span>recently played</h2>
+    <div class="games-grid" id="recentGrid"></div>
+  </section>
+
+  <section class="games-row" id="topSection" hidden>
+    <h2 class="row-title"><span class="material-symbols-rounded">trending_up</span>top played</h2>
+    <div class="games-grid" id="topGrid"></div>
   </section>
 
   <section class="controls">
     <div class="category-pills" id="categoryPills">
       <button class="pill active" data-category="all">all</button>
     </div>
+    <div class="controls-right">
+      <span class="game-count" id="gameCount"></span>
+      <button class="pill" id="randomGame" type="button" title="Open a random game"><span class="material-symbols-rounded">casino</span>random</button>
+    </div>
   </section>
 
   <section class="games-grid" id="gamesGrid">
     <div class="loading-state">
       <div class="spinner"></div>
-      <p>loading apps&hellip;</p>
+      <p>loading games&hellip;</p>
     </div>
   </section>
 
@@ -75,6 +109,6 @@
   <p>velcro</p>
 </footer>
 
-<script src="/apps.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>

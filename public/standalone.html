@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>velcro (standalone)</title>
+<script src="https://cdn.jsdelivr.net/npm/libcurl.js@0.7.1/libcurl.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -805,6 +811,72 @@ html, body.player-open { overflow: hidden; }
 .proxy-frame { width: 100%; height: 65vh; border: none; border-radius: 14px; background: #000; }
 .unavailable { border: 2px dashed var(--border); border-radius: 18px; padding: 40px; text-align: center; color: var(--text-muted); max-width: 500px; margin: 0 auto; }
 .unavailable .material-symbols-rounded { font-size: 40px; color: var(--accent-bright); display: block; margin-bottom: 12px; }
+
+.ai-layout { display: flex; gap: 20px; max-width: 1500px; margin: 0 auto; padding: 0 0 20px; height: calc(100vh - 260px); min-height: 420px; }
+.chat-main { flex: 1 1 0; max-width: 1000px; margin: 0 auto; min-width: 0; display: flex; flex-direction: column; }
+.ai-browser-pane { display: none; flex: 1 1 0; min-width: 340px; flex-direction: column; border: 2px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg-elevated); }
+.ai-browser-pane.open { display: flex; }
+.ai-browser-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-elevated); border-bottom: 2px solid var(--border); flex-shrink: 0; }
+.ai-browser-title { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.ai-browser-actions { display: flex; gap: 6px; }
+.ai-browser-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-elevated); color: var(--icon-color); text-decoration: none; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+.ai-browser-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); }
+.ai-browser-btn .material-symbols-rounded { font-size: 17px; }
+.ai-browser-body { position: relative; flex: 1; }
+.ai-browser-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; display: block; background: #fff; }
+.ai-browser-loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: opacity 0.3s ease; z-index: 5; }
+.ai-browser-loader.gone { opacity: 0; pointer-events: none; }
+.chat-header-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 0 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.chat-title { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--text); }
+.chat-online { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; background: none; border: none; font-family: var(--font-body); padding: 6px 12px; border-radius: 999px; transition: background 0.15s, color 0.15s; }
+.chat-online:hover { background: var(--bg-elevated-hover); color: var(--text); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
+.chat-messages::-webkit-scrollbar { width: 5px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.chat-msg { display: flex; flex-direction: column; gap: 2px; max-width: 100%; }
+.chat-msg-meta { display: flex; align-items: baseline; gap: 8px; }
+.chat-msg-name { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--accent-bright); }
+.chat-msg.mine .chat-msg-name { color: var(--accent); }
+.chat-msg-text { font-size: 14px; color: var(--text); line-height: 1.5; word-break: break-word; padding: 8px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 0 12px 12px 12px; display: inline-block; max-width: 92%; }
+.chat-msg.mine { align-items: flex-end; }
+.chat-msg.mine .chat-msg-meta { flex-direction: row-reverse; }
+.chat-msg.mine .chat-msg-text { background: var(--accent-glow); border-color: var(--accent); border-radius: 12px 0 12px 12px; }
+.chat-msg-text:not(.md) { white-space: pre-wrap; }
+.chat-sys { font-size: 12px; color: var(--text-muted); text-align: center; padding: 4px 0; font-style: italic; }
+.chat-msg-text.md > *:first-child { margin-top: 0; }
+.chat-msg-text.md > *:last-child { margin-bottom: 0; }
+.chat-msg-text.md h1, .chat-msg-text.md h2, .chat-msg-text.md h3 { font-family: var(--font-display); font-weight: 700; margin: 14px 0 6px; line-height: 1.3; }
+.chat-msg-text.md h1 { font-size: 18px; }
+.chat-msg-text.md h2 { font-size: 16px; }
+.chat-msg-text.md h3 { font-size: 14.5px; }
+.chat-msg-text.md p { margin: 8px 0; }
+.chat-msg-text.md strong { color: var(--accent-bright); }
+.chat-msg-text.md ul, .chat-msg-text.md ol { margin: 8px 0; padding-left: 22px; }
+.chat-msg-text.md li { margin: 3px 0; }
+.chat-msg-text.md hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.chat-msg-text.md code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+.chat-msg-text.md pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; }
+.chat-msg-text.md pre code { background: none; border: none; padding: 0; }
+.chat-msg-text.md blockquote { border-left: 3px solid var(--accent); margin: 8px 0; padding: 2px 12px; color: var(--text-muted); }
+.chat-msg-text.md table { border-collapse: collapse; margin: 8px 0; font-size: 13px; display: block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+.chat-msg-text.md th, .chat-msg-text.md td { border: 1px solid var(--border); padding: 4px 8px; }
+.chat-msg-text.md a { color: var(--accent-bright); }
+.chat-msg-text.md .katex { font-size: 1.05em; }
+.chat-msg-text.md .katex-display { margin: 10px 0; overflow-x: auto; overflow-y: hidden; }
+#aiTypingLabel { color: var(--text-muted); font-size: 13px; font-style: italic; }
+.ai-typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.ai-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: aiTypingBounce 1.2s infinite ease-in-out; }
+.ai-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes aiTypingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+.chat-input-area { flex-shrink: 0; padding: 14px 0 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.chat-send-row { display: flex; gap: 8px; }
+.chat-text-input { flex: 1; background: var(--bg-elevated); border: 2px solid var(--border); border-radius: 10px; color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 10px 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.chat-text-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.chat-text-input::placeholder { color: var(--text-muted); }
+.chat-send-btn { background: var(--accent); border: none; border-radius: 10px; color: var(--bg); font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 10px 20px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: background 0.15s; }
+.chat-send-btn:hover { background: var(--accent-bright); }
+.chat-send-btn:disabled { opacity: 0.5; cursor: default; }
 </style>
 </head>
 <body>
@@ -828,6 +900,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
@@ -851,6 +924,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
@@ -868,6 +942,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
@@ -885,6 +960,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming" class="active"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
@@ -902,10 +978,11 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser" class="active"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
-    <section class="hero"><h1>browser</h1><p class="tagline" id="proxyStatus">initializing scramjet + wisp&hellip;</p></section>
+    <section class="hero"><h1>browser</h1><p class="tagline" id="proxyStatus"></p></section>
     <div class="browser-bar">
       <input id="urlBar" class="search-input" style="background:var(--bg-elevated); border:2px solid var(--border); border-radius:999px; padding:10px 16px;" placeholder="enter a url" />
       <button id="goBtn" class="pill active" style="border:none;">go</button>
@@ -923,11 +1000,68 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat" class="active"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
     <section class="hero"><h1>chat</h1></section>
     <div class="unavailable"><span class="material-symbols-rounded">forum</span>chat needs a live WebSocket server relaying messages between real users &mdash; that can't exist inside a single static file. use the full site for this.</div>
+  </main>
+</div>
+
+<div class="view" id="view-ai">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai" class="active"><span class="material-symbols-rounded">smart_toy</span>ai</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main class="ai-layout">
+    <div class="chat-main">
+      <div class="chat-header-bar">
+        <span class="chat-title">ai chat</span>
+        <button class="chat-online" id="aiNewChat" type="button" title="Start a new conversation">
+          <span class="material-symbols-rounded" style="font-size: 16px;">refresh</span>
+          new chat
+        </button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-sys">ask anything — this is one continuous conversation until you start a new chat</div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-send-row">
+          <input class="chat-text-input" id="chatTextInput" placeholder="message the ai…" maxlength="2000" autocomplete="off" />
+          <button class="chat-send-btn" id="chatSendBtn" type="button">
+            <span class="material-symbols-rounded" style="font-size: 18px;">send</span>
+            send
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="ai-browser-pane" id="aiBrowserPane">
+      <div class="ai-browser-bar">
+        <span class="ai-browser-title" id="aiBrowserTitle">browser</span>
+        <div class="ai-browser-actions">
+          <button class="ai-browser-btn" id="aiBrowserOpenTab" type="button" title="Open in a full browser tab">
+            <span class="material-symbols-rounded">open_in_new</span>
+          </button>
+          <button class="ai-browser-btn" id="aiBrowserClose" type="button" title="Close">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+      <div class="ai-browser-body">
+        <iframe id="aiBrowserFrame" class="ai-browser-frame" allowfullscreen></iframe>
+        <div class="ai-browser-loader gone" id="aiBrowserLoader">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -940,6 +1074,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="ai"><span class="material-symbols-rounded">smart_toy</span>ai</a>
     <a data-view="account" class="active"><span class="material-symbols-rounded">person</span>account</a>
   </nav>
   <main>
@@ -970,6 +1105,10 @@ html, body.player-open { overflow: hidden; }
 </div>
 
 <script>
+window.addEventListener("beforeunload", function (e) {
+  e.preventDefault();
+  e.returnValue = "";
+});
 const GAMES = [
   {
     "id": "plague-inc-evolved",
@@ -3979,48 +4118,363 @@ fetch("https://api.themoviedb.org/3/movie/popular?api_key=" + TMDB_KEY + "&page=
   })
   .catch(err => { moviesStatus.textContent = "TMDB fetch failed: " + err.message; });
 
-async function waitForActivation(reg) {
-  if (reg.active) return;
-  const sw = reg.installing || reg.waiting;
-  if (!sw) return;
-  await new Promise(res => {
-    sw.addEventListener("statechange", function h() {
-      if (this.state === "activated") { this.removeEventListener("statechange", h); res(); }
+// --- proxy engine: libcurl.js (WASM HTTP client tunneled over WISP) ------
+// Same engine as the full site (see public/libcurl-proxy.js there) inlined
+// here since this is a single static file with no server of its own — no
+// service worker anywhere, which is also what makes this file able to run
+// unmodified inside Apps Script's HtmlService (which can't host one at all).
+// See that file's comments for the full reasoning behind each piece below;
+// the one thing that differs here is the cookie relay (nowgg.fun-style
+// sites need real Set-Cookie access libcurl.js never exposes): the real
+// site has its own Express route for that, this file instead calls back
+// into Code.gs's cookieFetch() via google.script.run when running inside
+// Apps Script, or the same /api/cookie-fetch route when just served
+// statically somewhere that happens to have it (best-effort either way).
+let proxyReady = false;
+const WISP = "wss://anura.pro/wisp/";
+// The cookie-relay and ai-chat routes below live on the real velcro
+// server. A relative fetch("/api/...") only reaches them when this file
+// is actually served BY that server — when it's embedded elsewhere (the
+// jsdelivr/foreignObject build has no backend of its own at all), a
+// relative path resolves against that host instead and always 405s. An
+// absolute URL works identically in both cases, so just always use it.
+const BACKEND_ORIGIN = "https://footless-morale-gating.ngrok-free.dev";
+let lcReadyPromise = null;
+async function lcWaitForGlobal() {
+  if (typeof libcurl !== "undefined" && libcurl) return;
+  for (let i = 0; i < 100; i++) {
+    if (typeof libcurl !== "undefined" && libcurl) return;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  throw new Error("libcurl.js global not found");
+}
+async function lcInit(statusEl) {
+  if (lcReadyPromise) return lcReadyPromise;
+  lcReadyPromise = (async () => {
+    await lcWaitForGlobal();
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error("libcurl.js init timed out")), 20000);
+      libcurl.onload = () => { clearTimeout(timeout); resolve(); };
+      libcurl.load_wasm("https://cdn.jsdelivr.net/npm/libcurl.js@0.7.1/libcurl.wasm");
     });
-  });
+    libcurl.set_websocket(WISP);
+    proxyReady = true;
+    if (statusEl) statusEl.textContent = "";
+  })();
+  lcReadyPromise.catch(err => { if (statusEl) statusEl.textContent = "proxy init failed: " + err.message; });
+  return lcReadyPromise;
 }
 
-let proxyReady = false;
-let codec = null;
-async function initScramjet(statusEl) {
-  if (location.protocol === "file:") {
-    statusEl.textContent = "can't init — open this file over http:// (e.g. \"npx serve .\"), not by double-clicking it. service workers are blocked on file:// in every browser.";
-    return;
-  }
-  try {
-    const WISP = "wss://anura.pro/wisp/";
-    const { ScramjetController } = await import("/scramjet/scramjet.bundle.js");
-    const { BareMuxConnection } = await import("/bare-mux/index.mjs");
-    const controller = new ScramjetController({
-      prefix: "/scramjet/",
-      files: { wasm: "/scramjet/scramjet.wasm.wasm", all: "/scramjet/scramjet.all.js", sync: "/scramjet/scramjet.sync.js" },
-    });
-    const existing = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(existing.map(r => r.unregister()));
-    if (existing.length > 0) await new Promise(r => setTimeout(r, 600));
-    await controller.init();
-    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/scramjet/" });
-    await waitForActivation(reg);
-    const conn = new BareMuxConnection("/bare-mux/worker.js");
-    await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
-    codec = { encodeUrl: url => controller.encodeUrl(url) };
-    proxyReady = true;
-    if (statusEl) statusEl.textContent = "proxy ready — using the public wss://anura.pro/wisp/ relay (this file has no server of its own)";
-  } catch (err) {
-    if (statusEl) statusEl.textContent = "proxy init failed: " + err.message;
-  }
+const LC_COOKIE_RELAY_HOSTS = [/(^|\.)nowgg\.fun$/i];
+const lcCookieJar = new Map();
+function lcNeedsCookieRelay(url) {
+  let host;
+  try { host = new URL(url).hostname; } catch { return false; }
+  return LC_COOKIE_RELAY_HOSTS.some(re => re.test(host));
 }
-initScramjet(document.getElementById("proxyStatus"));
+function lcCookieDomainKey(domain) { return domain.replace(/^\./, "").toLowerCase(); }
+function lcStoreSetCookie(setCookieStr, requestHostname) {
+  const parts = setCookieStr.split(";").map(s => s.trim());
+  const nameValue = parts[0] || "";
+  const eq = nameValue.indexOf("=");
+  if (eq < 0) return;
+  const name = nameValue.slice(0, eq).trim();
+  const value = nameValue.slice(eq + 1).trim();
+  let domain = requestHostname;
+  for (const attr of parts.slice(1)) {
+    const aEq = attr.indexOf("=");
+    if (aEq < 0) continue;
+    if (attr.slice(0, aEq).trim().toLowerCase() === "domain") domain = attr.slice(aEq + 1).trim();
+  }
+  const key = lcCookieDomainKey(domain);
+  if (!lcCookieJar.has(key)) lcCookieJar.set(key, new Map());
+  lcCookieJar.get(key).set(name, value);
+}
+function lcCookieHeaderFor(hostname) {
+  const h = hostname.toLowerCase();
+  const pairs = [];
+  for (const [domain, map] of lcCookieJar) {
+    if (h === domain || h.endsWith("." + domain)) {
+      for (const [k, v] of map) pairs.push(`${k}=${v}`);
+    }
+  }
+  return pairs.join("; ");
+}
+function lcBase64ToBytes(b64) {
+  const bin = atob(b64 || "");
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function lcHasGAS() { return typeof google !== "undefined" && google.script && google.script.run; }
+function lcRawCookieFetch(url, cookie, method, headers, body) {
+  if (lcHasGAS()) {
+    return new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler(data => (data && data.error ? reject(new Error(data.error)) : resolve(data)))
+        .withFailureHandler(err => reject(new Error((err && err.message) || String(err))))
+        .cookieFetch(url, cookie, method, headers, body);
+    });
+  }
+  return fetch(BACKEND_ORIGIN + "/api/cookie-fetch", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ url, cookie, method, headers, body }),
+  }).then(async r => {
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "cookie-fetch failed");
+    return data;
+  });
+}
+async function lcCookieRelayFetch(url, params = {}) {
+  const hostname = new URL(url).hostname;
+  const cookie = lcCookieHeaderFor(hostname);
+  const data = await lcRawCookieFetch(url, cookie, params.method || "GET", params.headers || {}, typeof params.body === "string" ? params.body : undefined);
+  for (const sc of data.setCookies || []) lcStoreSetCookie(sc, hostname);
+  const bytes = lcBase64ToBytes(data.bodyBase64);
+  return {
+    url: data.finalUrl || url,
+    status: data.status,
+    ok: data.status >= 200 && data.status < 300,
+    headers: { get: name => (name.toLowerCase() === "content-type" ? data.contentType : null) },
+    text: async () => new TextDecoder().decode(bytes),
+    arrayBuffer: async () => bytes.buffer,
+  };
+}
+function lcDoFetch(url, params) {
+  return lcNeedsCookieRelay(url) ? lcCookieRelayFetch(url, params) : libcurl.fetch(url, params);
+}
+async function lcHandleRuntimeFetch(iframeEl, req) {
+  let payload;
+  try {
+    const res = await lcDoFetch(req.url, { method: req.method, headers: req.headers, body: req.body });
+    const buf = await res.arrayBuffer();
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    payload = { id: req.id, status: res.status, headers: { "content-type": res.headers?.get?.("content-type") || "" }, bodyBase64: btoa(binary) };
+  } catch (err) {
+    payload = { id: req.id, error: err.message || "fetch failed" };
+  }
+  iframeEl.contentWindow.postMessage({ __libcurlProxyFetchResponse: payload }, "*");
+}
+function lcGuessType(url) {
+  const ext = (url.split("?")[0].split(".").pop() || "").toLowerCase();
+  const map = {
+    css: "text/css", js: "application/javascript", mjs: "application/javascript",
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif",
+    svg: "image/svg+xml", webp: "image/webp", ico: "image/x-icon",
+    woff: "font/woff", woff2: "font/woff2", ttf: "font/ttf", json: "application/json",
+  };
+  return map[ext] || "application/octet-stream";
+}
+async function lcFetchAsBlobUrl(absUrl) {
+  try {
+    const res = await lcDoFetch(absUrl);
+    const ct = res.headers?.get?.("content-type") || lcGuessType(absUrl);
+    const buf = await res.arrayBuffer();
+    return URL.createObjectURL(new Blob([buf], { type: ct }));
+  } catch (e) { return null; }
+}
+function lcRewriteJs(code) {
+  return code
+    .replace(/\b(?:window|self|document|top|parent)\.location\b/g, "window.__plocation")
+    .replace(/(?<![.\w$])location\b(?!\s*:)/g, "window.__plocation");
+}
+function lcShouldRewriteScript(el) {
+  const type = (el.getAttribute("type") || "").toLowerCase();
+  if (!type) return true;
+  return type === "text/javascript" || type === "module" || type === "application/javascript";
+}
+async function lcFetchScriptBlobUrl(absUrl) {
+  try {
+    const res = await lcDoFetch(absUrl);
+    const code = await res.text();
+    return URL.createObjectURL(new Blob([lcRewriteJs(code)], { type: "application/javascript" }));
+  } catch (e) { return null; }
+}
+function lcBuildBootstrap(realUrl) {
+  return `(function(){
+  var REAL_URL = ${JSON.stringify(realUrl)};
+  function navigateTo(target) {
+    try {
+      var abs = new URL(target, REAL_URL).href;
+      window.parent.postMessage({ __libcurlProxyNavigate: abs }, "*");
+    } catch (e) {}
+  }
+  function u() { try { return new URL(REAL_URL); } catch(e) { return new URL("about:blank"); } }
+  window.__plocation = {
+    get href() { return REAL_URL; },
+    set href(v) { navigateTo(v); },
+    get host() { return u().host; },
+    get hostname() { return u().hostname; },
+    get origin() { return u().origin; },
+    get pathname() { return u().pathname; },
+    get search() { return u().search; },
+    get hash() { return u().hash; },
+    get protocol() { return u().protocol; },
+    get port() { return u().port; },
+    assign: navigateTo,
+    replace: navigateTo,
+    reload: function(){ navigateTo(REAL_URL); },
+    toString: function(){ return REAL_URL; },
+  };
+  try {
+    var uu = u();
+    var defs = {
+      href: { get: function(){ return REAL_URL; }, set: navigateTo },
+      host: { get: function(){ return uu.host; } },
+      hostname: { get: function(){ return uu.hostname; } },
+      origin: { get: function(){ return uu.origin; } },
+      pathname: { get: function(){ return uu.pathname; } },
+      search: { get: function(){ return uu.search; } },
+      hash: { get: function(){ return uu.hash; } },
+      protocol: { get: function(){ return uu.protocol; } },
+      port: { get: function(){ return uu.port; } },
+      assign: { value: navigateTo },
+      replace: { value: navigateTo },
+      reload: { value: function(){ navigateTo(REAL_URL); } },
+      toString: { value: function(){ return REAL_URL; } },
+    };
+    for (var k in defs) {
+      var desc = Object.assign({configurable:true}, defs[k]);
+      try { Object.defineProperty(location, k, desc); continue; } catch(e) {}
+      try { Object.defineProperty(Object.getPrototypeOf(location), k, desc); } catch(e) {}
+    }
+  } catch (e) {}
+  try {
+    var origReplace = window.history.replaceState.bind(window.history);
+    var origPush = window.history.pushState.bind(window.history);
+    window.history.replaceState = function(state, title, url) { try { return origReplace(state, title, url); } catch(e) {} };
+    window.history.pushState = function(state, title, url) { try { return origPush(state, title, url); } catch(e) {} };
+  } catch (e) {}
+  var origFetch = window.fetch ? window.fetch.bind(window) : null;
+  var fetchReqId = 0;
+  var pendingFetches = {};
+  window.addEventListener("message", function (e) {
+    if (e.source !== window.parent) return;
+    var reply = e.data && e.data.__libcurlProxyFetchResponse;
+    if (!reply || !pendingFetches[reply.id]) return;
+    var entry = pendingFetches[reply.id];
+    delete pendingFetches[reply.id];
+    if (reply.error) { entry.reject(new TypeError(reply.error)); return; }
+    var bytes = null;
+    try {
+      var bin = atob(reply.bodyBase64 || "");
+      bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    } catch (err) {}
+    entry.resolve(new Response(bytes, { status: reply.status, headers: reply.headers || {} }));
+  });
+  if (origFetch) {
+    window.fetch = function (input, init) {
+      var url, method = "GET", headers = {}, body = null;
+      try {
+        if (input instanceof Request) { url = input.url; method = input.method || "GET"; }
+        else { url = String(input); }
+        if (init) {
+          if (init.method) method = init.method;
+          if (init.headers) headers = Object.fromEntries(new Headers(init.headers).entries());
+          if (typeof init.body === "string") body = init.body;
+        }
+        url = new URL(url, REAL_URL).href;
+      } catch (e) { return origFetch(input, init); }
+      var id = ++fetchReqId;
+      return new Promise(function (resolve, reject) {
+        pendingFetches[id] = { resolve: resolve, reject: reject };
+        window.parent.postMessage({ __libcurlProxyFetchRequest: { id: id, url: url, method: method, headers: headers, body: body } }, "*");
+        setTimeout(function () {
+          if (pendingFetches[id]) { delete pendingFetches[id]; reject(new TypeError("proxied fetch timed out")); }
+        }, 30000);
+      });
+    };
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+    e.preventDefault();
+    navigateTo(href);
+  }, true);
+  document.addEventListener("submit", function (e) {
+    var form = e.target;
+    if (!form || (form.method || "").toLowerCase() === "post") return;
+    e.preventDefault();
+    var action = form.getAttribute("action") || REAL_URL;
+    var abs;
+    try { abs = new URL(action, REAL_URL); } catch (e) { return; }
+    var data = new FormData(form);
+    for (var pair of data.entries()) abs.searchParams.set(pair[0], pair[1]);
+    navigateTo(abs.href);
+  }, true);
+})();`;
+}
+async function lcRewriteAndLoad(iframeEl, url, onStatus) {
+  onStatus && onStatus("fetching " + url);
+  const res = await lcDoFetch(url);
+  const finalUrl = res.url || url;
+  const html = await res.text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  if (!doc.querySelector("base")) {
+    const base = doc.createElement("base");
+    base.href = finalUrl;
+    doc.head?.prepend(base);
+  }
+  doc.querySelectorAll("script:not([src])").forEach(el => {
+    if (lcShouldRewriteScript(el) && el.textContent) el.textContent = lcRewriteJs(el.textContent);
+  });
+  const INLINE_EVENT_ATTRS = /^on\w+$/;
+  doc.querySelectorAll("*").forEach(el => {
+    for (const attr of Array.from(el.attributes)) {
+      if (INLINE_EVENT_ATTRS.test(attr.name) && attr.value) el.setAttribute(attr.name, lcRewriteJs(attr.value));
+    }
+  });
+  const assets = [];
+  doc.querySelectorAll("link[rel=stylesheet][href], script[src], img[src]").forEach(el => {
+    const attr = el.tagName === "LINK" ? "href" : "src";
+    const raw = el.getAttribute(attr);
+    if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return;
+    let abs;
+    try { abs = new URL(raw, finalUrl).href; } catch { return; }
+    const isScript = el.tagName === "SCRIPT" && lcShouldRewriteScript(el);
+    assets.push({ el, attr, abs, isScript });
+  });
+  onStatus && onStatus("loading " + assets.length + " sub-resources");
+  await Promise.all(assets.map(async a => {
+    const blobUrl = a.isScript ? await lcFetchScriptBlobUrl(a.abs) : await lcFetchAsBlobUrl(a.abs);
+    if (blobUrl) a.el.setAttribute(a.attr, blobUrl);
+    else a.el.removeAttribute(a.attr);
+  }));
+  const bootstrapScript = doc.createElement("script");
+  bootstrapScript.textContent = lcBuildBootstrap(finalUrl);
+  doc.head?.prepend(bootstrapScript);
+  iframeEl.srcdoc = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+  onStatus && onStatus("loaded " + finalUrl);
+  return finalUrl;
+}
+async function lcNavigate(iframeEl, url, onStatus, onNavigated) {
+  await lcInit();
+  if (onNavigated) iframeEl.__libcurlOnNavigated = onNavigated;
+  if (!iframeEl.hasAttribute("sandbox")) {
+    iframeEl.setAttribute("sandbox", "allow-scripts allow-forms allow-same-origin allow-popups");
+  }
+  if (!iframeEl.__libcurlNavHandler) {
+    iframeEl.__libcurlNavHandler = (e) => {
+      if (e.source !== iframeEl.contentWindow) return;
+      const fetchReq = e.data && e.data.__libcurlProxyFetchRequest;
+      if (fetchReq) { lcHandleRuntimeFetch(iframeEl, fetchReq); return; }
+      const target = e.data && e.data.__libcurlProxyNavigate;
+      if (!target) return;
+      lcRewriteAndLoad(iframeEl, target, onStatus)
+        .then(finalUrl => iframeEl.__libcurlOnNavigated && iframeEl.__libcurlOnNavigated(finalUrl))
+        .catch(err => onStatus && onStatus("error: " + err.message));
+    };
+    window.addEventListener("message", iframeEl.__libcurlNavHandler);
+  }
+  return lcRewriteAndLoad(iframeEl, url, onStatus);
+}
+lcInit(document.getElementById("proxyStatus"));
 
 // --- browser tab (address-bar browsing, separate from the game player) ---
 const proxyFrame = document.getElementById("proxyFrame");
@@ -4035,9 +4489,9 @@ function resolveUrl(input) {
 function browserNavigate(url) {
   urlBar.value = url;
   const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
-  if (isLocal) { proxyFrame.src = url; return; }
-  if (!proxyReady) { document.getElementById("proxyStatus").textContent = "proxy still initializing, try again in a sec"; return; }
-  proxyFrame.src = codec.encodeUrl(url);
+  if (isLocal) { proxyFrame.removeAttribute("srcdoc"); proxyFrame.src = url; return; }
+  lcNavigate(proxyFrame, url, msg => { document.getElementById("proxyStatus").textContent = msg; })
+    .catch(err => { document.getElementById("proxyStatus").textContent = "failed: " + err.message; });
 }
 document.getElementById("goBtn").addEventListener("click", () => { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); });
 urlBar.addEventListener("keydown", e => { if (e.key === "Enter") { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); } });
@@ -4060,11 +4514,11 @@ glDismiss.addEventListener("click", hideLoader);
 function closePlayer() {
   gamePlayer.classList.remove("open");
   document.body.classList.remove("player-open");
+  gameFrame.removeAttribute("srcdoc");
   gameFrame.src = "about:blank";
 }
 document.getElementById("playerBack").addEventListener("click", closePlayer);
 document.getElementById("playerClose").addEventListener("click", closePlayer);
-gameFrame.addEventListener("load", () => { if (gameFrame.src && gameFrame.src !== "about:blank") setTimeout(hideLoader, 250); });
 
 async function launchGame(url, title) {
   gamePlayer.classList.add("open");
@@ -4078,15 +4532,266 @@ async function launchGame(url, title) {
   dismissTimer = setTimeout(() => { if (!loaderHidden) glDismiss.hidden = false; }, 8000);
 
   const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
-  if (isLocal) { gameFrame.src = url; return; }
-  if (!proxyReady) {
-    document.getElementById("glHint").textContent = "proxy still initializing, waiting a moment&hellip;";
-    let tries = 0;
-    while (!proxyReady && tries < 50) { await new Promise(r => setTimeout(r, 100)); tries++; }
+  if (isLocal) { gameFrame.removeAttribute("srcdoc"); gameFrame.src = url; return; }
+  try {
+    await lcNavigate(gameFrame, url, msg => { document.getElementById("glHint").textContent = msg; });
+    setTimeout(hideLoader, 250);
+  } catch (err) {
+    document.getElementById("glHint").textContent = "failed: " + err.message;
   }
-  if (proxyReady) { gameFrame.src = codec.encodeUrl(url); }
-  else { document.getElementById("glHint").textContent = "proxy failed to initialize — try reloading"; }
 }
+
+// --- ai chat -------------------------------------------------------------
+// Same feature as the real site's ai.html/ai.js, adapted for here: the
+// browser panel reuses our own lcNavigate() (srcdoc + libcurl.js) instead
+// of scramjet, and the chat request itself goes through google.script.run
+// (Apps Script) or /api/ai/chat (if this file happens to be served by a
+// real backend that has it) instead of a streaming fetch — see lcRawCookieFetch
+// above for the same dual-path pattern. google.script.run can't stream, so
+// the whole tool-calling loop runs server-side in one blocking call and
+// the reply + any queued browser actions land together at the end.
+(function () {
+  const messagesEl = document.getElementById("chatMessages");
+  const input = document.getElementById("chatTextInput");
+  const sendBtn = document.getElementById("chatSendBtn");
+  const newChatBtn = document.getElementById("aiNewChat");
+  const browserPane = document.getElementById("aiBrowserPane");
+  const browserFrame = document.getElementById("aiBrowserFrame");
+  const browserLoader = document.getElementById("aiBrowserLoader");
+  const browserTitle = document.getElementById("aiBrowserTitle");
+  const browserClose = document.getElementById("aiBrowserClose");
+  const browserOpenTab = document.getElementById("aiBrowserOpenTab");
+  let currentBrowserUrl = "";
+
+  function closeAiBrowser() {
+    browserPane.classList.remove("open");
+    browserFrame.removeAttribute("srcdoc");
+    browserFrame.src = "about:blank";
+    currentBrowserUrl = "";
+  }
+  browserClose.addEventListener("click", closeAiBrowser);
+  browserOpenTab.addEventListener("click", () => { if (currentBrowserUrl) window.open(currentBrowserUrl, "_blank", "noopener"); });
+
+  async function openInAiBrowser(action) {
+    browserPane.classList.add("open");
+    browserLoader.classList.remove("gone");
+    if (action.isDataHtml && typeof action.html === "string") {
+      currentBrowserUrl = "";
+      browserTitle.textContent = action.title || "code preview";
+      browserFrame.removeAttribute("sandbox");
+      browserFrame.srcdoc = action.html;
+      browserLoader.classList.add("gone");
+      return;
+    }
+    const url = action.url;
+    currentBrowserUrl = url;
+    browserTitle.textContent = action.title || url;
+    const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
+    if (isLocal) { browserFrame.removeAttribute("srcdoc"); browserFrame.src = url; browserLoader.classList.add("gone"); return; }
+    try {
+      await lcNavigate(browserFrame, url, () => {});
+    } catch (e) {}
+    browserLoader.classList.add("gone");
+  }
+
+  function scrollAiBrowser(direction, amount) {
+    try {
+      const win = browserFrame.contentWindow;
+      win.scrollBy({ top: direction === "up" ? -(amount || 600) : (amount || 600), behavior: "smooth" });
+    } catch (e) {}
+  }
+
+  function clickAiBrowser(text) {
+    try {
+      const doc = browserFrame.contentDocument;
+      if (!doc) return;
+      const lower = String(text || "").trim().toLowerCase();
+      const candidates = doc.querySelectorAll("a,button,input[type=submit],input[type=button],[role=button],summary");
+      for (const el of candidates) {
+        const t = (el.innerText || el.value || el.getAttribute("aria-label") || "").trim().toLowerCase();
+        if (t && t.includes(lower)) { el.click(); return; }
+      }
+    } catch (e) {}
+  }
+
+  function goBackAiBrowser() {
+    try { browserFrame.contentWindow.history.back(); } catch (e) {}
+  }
+
+  async function applyAiAction(action) {
+    if (action.type === "open_url") await openInAiBrowser(action);
+    else if (action.type === "scroll_browser") scrollAiBrowser(action.direction, action.amount);
+    else if (action.type === "click_browser") clickAiBrowser(action.text);
+    else if (action.type === "go_back_browser") goBackAiBrowser();
+    else if (action.type === "close_browser") closeAiBrowser();
+  }
+
+  function getAiPageContext() {
+    if (!browserPane.classList.contains("open") || !currentBrowserUrl) return null;
+    try {
+      const doc = browserFrame.contentDocument;
+      const text = doc?.body?.innerText;
+      if (!text) return null;
+      return { url: currentBrowserUrl, text: text.slice(0, 4000) };
+    } catch (e) { return null; }
+  }
+
+  function rawAiChat(messagesJson, pageContextJson) {
+    if (lcHasGAS()) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(data => (data && data.error ? reject(new Error(data.error)) : resolve(data)))
+          .withFailureHandler(err => reject(new Error((err && err.message) || String(err))))
+          .aiChat(messagesJson, pageContextJson);
+      });
+    }
+    return fetch(BACKEND_ORIGIN + "/api/ai/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: JSON.parse(messagesJson), pageContext: pageContextJson ? JSON.parse(pageContextJson) : null }),
+    }).then(async r => {
+      if (!r.ok || !r.body) {
+        let msg = "request failed";
+        try { msg = (await r.json())?.error || msg; } catch (e) {}
+        throw new Error(msg);
+      }
+      // the real backend streams NDJSON status/final events; here we just
+      // want the final one, so drain the stream and keep only that.
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "", final = null;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (!line.trim()) continue;
+          const evt = JSON.parse(line);
+          if (evt.type === "final") final = evt;
+          else if (evt.type === "error") throw new Error(evt.error);
+        }
+      }
+      if (!final) throw new Error("no response from ai");
+      return { reply: final.reply, actions: final.actions };
+    });
+  }
+
+  const AI_STORAGE_KEY = "velcro_ai_history";
+  let aiHistory = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(AI_STORAGE_KEY) || "[]");
+    if (Array.isArray(saved)) aiHistory = saved;
+  } catch (e) {}
+  function saveAiHistory() { try { localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(aiHistory)); } catch (e) {} }
+  function scrollAiToEnd() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+  function renderAiMarkdown(text) {
+    const mathBlocks = [];
+    const protectedText = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$|\$[^\n$]+?\$/g, m => { mathBlocks.push(m); return `@@MATH${mathBlocks.length - 1}@@`; });
+    let html = marked.parse(protectedText, { breaks: true });
+    html = html.replace(/@@MATH(\d+)@@/g, (_, i) => mathBlocks[+i]);
+    return DOMPurify.sanitize(html);
+  }
+
+  function renderAiMessage(role, text, rich) {
+    const wrap = document.createElement("div");
+    wrap.className = "chat-msg" + (role === "user" ? " mine" : "");
+    const meta = document.createElement("div");
+    meta.className = "chat-msg-meta";
+    const name = document.createElement("span");
+    name.className = "chat-msg-name";
+    name.textContent = role === "user" ? "you" : "ai";
+    meta.appendChild(name);
+    const bubble = document.createElement("div");
+    bubble.className = "chat-msg-text";
+    if (rich && window.marked && window.DOMPurify) {
+      bubble.classList.add("md");
+      bubble.innerHTML = renderAiMarkdown(text);
+      if (window.renderMathInElement) {
+        renderMathInElement(bubble, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "\\[", right: "\\]", display: true },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "$", right: "$", display: false },
+          ],
+          throwOnError: false,
+        });
+      }
+    } else {
+      bubble.textContent = text;
+    }
+    wrap.appendChild(meta);
+    wrap.appendChild(bubble);
+    messagesEl.appendChild(wrap);
+    scrollAiToEnd();
+    return bubble;
+  }
+
+  function renderAiTyping() {
+    const wrap = document.createElement("div");
+    wrap.className = "chat-msg";
+    wrap.id = "aiTypingMsg";
+    const bubble = document.createElement("div");
+    bubble.className = "chat-msg-text";
+    bubble.innerHTML = '<span class="ai-typing"><span></span><span></span><span></span></span>';
+    wrap.appendChild(bubble);
+    messagesEl.appendChild(wrap);
+    scrollAiToEnd();
+  }
+  function removeAiTyping() { document.getElementById("aiTypingMsg")?.remove(); }
+
+  function renderAiHistory() {
+    messagesEl.innerHTML = "";
+    if (aiHistory.length === 0) {
+      const sys = document.createElement("div");
+      sys.className = "chat-sys";
+      sys.textContent = "ask anything — this is one continuous conversation until you start a new chat";
+      messagesEl.appendChild(sys);
+      return;
+    }
+    for (const m of aiHistory) renderAiMessage(m.role, m.content, m.role === "assistant");
+  }
+
+  async function sendAiMessage() {
+    const text = input.value.trim();
+    if (!text || sendBtn.disabled) return;
+    input.value = "";
+    aiHistory.push({ role: "user", content: text });
+    saveAiHistory();
+    renderAiMessage("user", text);
+    sendBtn.disabled = true;
+    input.disabled = true;
+    renderAiTyping();
+    try {
+      const pageContext = getAiPageContext();
+      const result = await rawAiChat(JSON.stringify(aiHistory), pageContext ? JSON.stringify(pageContext) : null);
+      removeAiTyping();
+      aiHistory.push({ role: "assistant", content: result.reply || "" });
+      saveAiHistory();
+      renderAiMessage("assistant", result.reply || "", true);
+      for (const action of result.actions || []) {
+        await applyAiAction(action);
+        await new Promise(r => setTimeout(r, 350));
+      }
+    } catch (err) {
+      removeAiTyping();
+      renderAiMessage("assistant", "something went wrong talking to the ai: " + (err?.message || err));
+    } finally {
+      sendBtn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener("click", sendAiMessage);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") sendAiMessage(); });
+  newChatBtn.addEventListener("click", () => { aiHistory = []; saveAiHistory(); renderAiHistory(); });
+  renderAiHistory();
+})();
 </script>
 </body>
 </html>

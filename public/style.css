@@ -105,6 +105,9 @@ body::after {
   gap: 16px;
   padding: 20px clamp(16px, 4vw, 48px);
   flex-wrap: wrap;
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .brand {
@@ -112,39 +115,45 @@ body::after {
   font-weight: 800;
   font-size: 30px;
   color: var(--accent-bright);
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .site-nav a {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   border: 2px solid var(--border);
   background: var(--bg-elevated);
   color: var(--text-muted);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 12px 18px;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 16px;
   text-decoration: none;
   text-transform: lowercase;
   transition: all 0.15s ease;
 }
 
-.site-nav a .material-symbols-rounded { font-size: 18px; }
+.site-nav a .material-symbols-rounded { font-size: 24px; }
 
 .site-nav a:hover { border-color: var(--accent); color: var(--accent-bright); }
 
@@ -176,7 +185,7 @@ body::after {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
-  width: 180px;
+  width: 130px;
 }
 
 .search-input::placeholder { color: var(--text-muted); }

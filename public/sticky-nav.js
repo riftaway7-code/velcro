@@ -1,11 +1,12 @@
 (function () {
   var LINKS = [
-    { href: "/", icon: "sports_esports", label: "games" },
+    { href: "/", icon: "home", label: "home" },
+    { href: "/games.html", icon: "sports_esports", label: "games" },
     { href: "/apps.html", icon: "apps", label: "apps" },
     { href: "/movies.html", icon: "movie", label: "movies" },
     { href: "/cloud-gaming.html", icon: "cloud", label: "cloud gaming" },
-    { href: "/browser.html", icon: "public", label: "browser" },
     { href: "/chat.html", icon: "forum", label: "chat" },
+    { href: "/ai.html", icon: "smart_toy", label: "ai" },
   ];
 
   var path = location.pathname;

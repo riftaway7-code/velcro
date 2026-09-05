@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>velcro</title>
 <script src="/theme.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/libcurl.js@0.7.1/libcurl.js"></script>
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,9 +13,230 @@
 <link rel="stylesheet" href="/style.css" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <meta name="theme-color" content="#7151a8" />
+<style>
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar { flex-shrink: 0; }
+
+  .browser-shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .browser-topbar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--bg-elevated);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .browser-topbar-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .browser-topbar-group.right { justify-content: flex-end; }
+
+  .browser-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--icon-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .browser-btn:hover { background: var(--bg-elevated-hover); border-color: var(--accent); transform: scale(1.05); }
+  .browser-btn .material-symbols-rounded { font-size: 20px; }
+
+  .url-bar-wrapper {
+    width: min(640px, 42vw);
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    transition: border-color 0.2s ease;
+  }
+
+  .url-bar-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+
+  .url-lock { color: var(--icon-color); font-size: 18px; flex-shrink: 0; }
+
+  .url-bar {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .url-bar:focus { text-align: left; }
+
+  .url-bar::placeholder { color: var(--text-muted); }
+
+  .url-go {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .url-go:hover { background: var(--accent-bright); }
+
+  .loading-line {
+    height: 3px;
+    width: 0;
+    background: var(--accent);
+    transition: width 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .browser-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .browser-start {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .home-logo { display: flex; flex-direction: column; gap: 10px; }
+
+  .home-logo h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(52px, 9vw, 96px);
+    margin: 0;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .home-logo .tagline { color: var(--text-muted); margin: 0; font-size: clamp(15px, 2vw, 18px); }
+
+  .home-url-bar {
+    width: min(560px, 90vw);
+    padding: 12px 20px;
+  }
+
+  .home-url-bar .url-bar { font-size: 16px; }
+
+  .home-search-icon { color: var(--icon-color); font-size: 20px; flex-shrink: 0; }
+
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    max-width: 480px;
+  }
+
+  .quick-link {
+    border: 2px solid var(--filter-border);
+    background: var(--filter-bg);
+    color: var(--filter-text);
+    border-radius: 999px;
+    padding: 9px 20px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .quick-link:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+  .proxy-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #000;
+  }
+
+  .hidden { display: none !important; }
+
+  .nav-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--bg);
+    text-align: center;
+    padding: 20px;
+  }
+
+  .nav-loading .spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .nav-loading-msg { color: var(--text-muted); font-size: 14px; max-width: 320px; }
+
+  .browser-blocked {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+  }
+</style>
 </head>
 <body>
 
+<script src="/unload-guard.js"></script>
 <script src="/cloak.js"></script>
 <script src="/panic.js"></script>
 <script src="/account.js"></script>
@@ -24,88 +246,90 @@
 <script src="/sticky-nav.js"></script>
 
 <header class="topbar">
-  <button id="scrollTop" class="scroll-top" type="button" aria-label="Scroll to top">
-    <span class="material-symbols-rounded">arrow_upward</span>
-  </button>
+  <a href="/" class="brand">velcro</a>
+  <nav class="site-nav">
+  <a href="/" class="active"><span class="material-symbols-rounded">home</span>home</a>
+  <a href="/games.html"><span class="material-symbols-rounded">sports_esports</span>games</a>
+  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
+  <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
+  <a href="/cloud-gaming.html"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
+  <a href="/chat.html"><span class="material-symbols-rounded">forum</span>chat</a>
+  <a href="/ai.html"><span class="material-symbols-rounded">smart_toy</span>ai</a>
+  <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
+  <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
+  <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
+  <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
+  <a href="/account.html"><span class="material-symbols-rounded">person</span>account</a>
+  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
+  </nav>
   <div class="topbar-right">
-    <div class="search-wrapper">
-      <span class="material-symbols-rounded search-icon">search</span>
-      <input id="searchInput" class="search-input" type="text" placeholder="search" autocomplete="off" />
-    </div>
     <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
       <span class="material-symbols-rounded">dark_mode</span>
     </button>
   </div>
 </header>
 
-<nav class="site-nav" style="justify-content: center; padding: 0 20px 20px;">
-  <a href="/" class="active"><span class="material-symbols-rounded">sports_esports</span>games</a>
-  <a href="/apps.html"><span class="material-symbols-rounded">apps</span>apps</a>
-  <a href="/movies.html"><span class="material-symbols-rounded">movie</span>movies</a>
-  <a href="/cloud-gaming.html"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>  <a href="/browser.html"><span class="material-symbols-rounded">public</span>browser</a>
-  <a href="/chat.html"><span class="material-symbols-rounded">forum</span>chat</a>
-  <a href="/credits.html"><span class="material-symbols-rounded">favorite</span>credits</a>
-  <a href="/links.html"><span class="material-symbols-rounded">link</span>links</a>
-  <a href="https://discord.gg/UWdeD4whhj" target="_blank" rel="noopener"><span class="material-symbols-rounded">forum</span>discord</a>
-    <a href="/search.html"><span class="material-symbols-rounded">search</span>search</a>
-<a href="/account.html"><span class="material-symbols-rounded">person</span>account</a>
-  <a href="/settings.html"><span class="material-symbols-rounded">settings</span>settings</a>
-</nav>
-
-<main>
-  <section class="hero">
-    <h1>velcro</h1>
-    <p class="tagline"><span id="typingText"></span><span class="caret" aria-hidden="true"></span></p>
-    <div class="user-stats" id="userStats">
-      <span class="user-stat"><span class="user-dot"></span><span id="activeUsersLine">&hellip; online</span></span>
-      <span class="user-stat"><span id="totalUsersLine">&hellip; total</span></span>
+<div class="browser-shell">
+  <div class="browser-topbar hidden" id="browserTopbar">
+    <div class="browser-topbar-group">
+      <button class="browser-btn" id="backBtn" title="Back">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <button class="browser-btn" id="forwardBtn" title="Forward">
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </button>
+      <button class="browser-btn" id="reloadBtn" title="Reload">
+        <span class="material-symbols-rounded">refresh</span>
+      </button>
     </div>
-  </section>
-
-  <section class="games-row" id="trendingSection" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">local_fire_department</span>trending now</h2>
-    <div class="games-grid" id="trendingGrid"></div>
-  </section>
-
-  <section class="games-row" id="favSection" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">star</span>favorites</h2>
-    <div class="games-grid" id="favGrid"></div>
-  </section>
-
-  <section class="games-row" id="recentSection" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">history</span>recently played</h2>
-    <div class="games-grid" id="recentGrid"></div>
-  </section>
-
-  <section class="games-row" id="topSection" hidden>
-    <h2 class="row-title"><span class="material-symbols-rounded">trending_up</span>top played</h2>
-    <div class="games-grid" id="topGrid"></div>
-  </section>
-
-  <section class="controls">
-    <div class="category-pills" id="categoryPills">
-      <button class="pill active" data-category="all">all</button>
+    <div class="url-bar-wrapper">
+      <span class="material-symbols-rounded url-lock">lock</span>
+      <input id="urlBar" class="url-bar" type="text" placeholder="search or enter a url" spellcheck="false" autocomplete="off" />
+      <button class="url-go" id="goBtn">go</button>
     </div>
-    <div class="controls-right">
-      <span class="game-count" id="gameCount"></span>
-      <button class="pill" id="randomGame" type="button" title="Open a random game"><span class="material-symbols-rounded">casino</span>random</button>
+    <div class="browser-topbar-group right">
+      <a href="/settings.html" class="browser-btn" title="Settings">
+        <span class="material-symbols-rounded">settings</span>
+      </a>
     </div>
-  </section>
+  </div>
+  <div class="loading-line" id="loadingBar"></div>
 
-  <section class="games-grid" id="gamesGrid">
-    <div class="loading-state">
+  <div class="browser-content" id="browserContent">
+    <div class="browser-start">
+      <div class="home-logo">
+        <h1>velcro</h1>
+        <p class="tagline">tunnel anywhere, no cap</p>
+      </div>
+      <div class="url-bar-wrapper home-url-bar">
+        <span class="material-symbols-rounded home-search-icon">search</span>
+        <input id="homeUrlBar" class="url-bar" type="text" placeholder="search or enter a url" spellcheck="false" autocomplete="off" />
+        <button class="url-go" id="homeGoBtn">go</button>
+      </div>
+      <div class="quick-links">
+        <button class="quick-link" data-url="https://google.com">google</button>
+        <button class="quick-link" data-url="https://youtube.com">youtube</button>
+        <button class="quick-link" data-url="https://reddit.com">reddit</button>
+        <button class="quick-link" data-url="https://github.com">github</button>
+        <button class="quick-link" data-url="https://wikipedia.org">wikipedia</button>
+        <button class="quick-link" data-url="https://discord.com">discord</button>
+      </div>
+    </div>
+
+    <div class="nav-loading hidden" id="navLoading">
       <div class="spinner"></div>
-      <p>loading games&hellip;</p>
+      <p class="nav-loading-msg" id="navLoadingMsg">loading the loading&hellip;</p>
     </div>
-  </section>
 
-  <p class="empty-state" id="emptyState" hidden>nothing matches that &mdash; try a different search</p>
-</main>
+    <iframe id="proxyFrame" class="proxy-frame hidden" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></iframe>
 
-<footer>
-  <p>velcro</p>
-</footer>
+    <div class="browser-blocked hidden" id="browserBlocked">
+      <p>proxy not available on this server &mdash; requires a server with wisp support</p>
+    </div>
+  </div>
+</div>
 
-<script src="/app.js"></script>
+<script src="/libcurl-proxy.js"></script>
+<script type="module" src="/browser.js"></script>
 </body>
 </html>

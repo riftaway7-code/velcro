@@ -1,5 +1,7 @@
 const urlBar = document.getElementById("urlBar");
 const goBtn = document.getElementById("goBtn");
+const homeUrlBar = document.getElementById("homeUrlBar");
+const homeGoBtn = document.getElementById("homeGoBtn");
 const backBtn = document.getElementById("backBtn");
 const forwardBtn = document.getElementById("forwardBtn");
 const reloadBtn = document.getElementById("reloadBtn");
@@ -9,6 +11,7 @@ const loadingBar = document.getElementById("loadingBar");
 const navLoading = document.getElementById("navLoading");
 const navLoadingMsg = document.getElementById("navLoadingMsg");
 const browserStart = document.querySelector(".browser-start");
+const browserTopbar = document.getElementById("browserTopbar");
 
 const LOADING_MSGS = [
   "loading the loading...",
@@ -38,106 +41,13 @@ function hideNavLoading() {
 
 let ready = false;
 let pendingUrl = null;
-let codec = null;
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-async function waitForActivation(reg) {
-  if (reg.active) return;
-  const sw = reg.installing || reg.waiting;
-  if (!sw) return;
-  await new Promise((resolve) => {
-    sw.addEventListener("statechange", function handler() {
-      if (this.state === "activated") { this.removeEventListener("statechange", handler); resolve(); }
-    });
-  });
-}
-
-async function initScramjet() {
-  const customWisp = localStorage.getItem("velcro_wisp_server");
-  const localWisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
-  const hasLocalWisp = await fetch("/api/wisp-available").then(r => r.ok).catch(() => false);
-  const WISP = customWisp || (hasLocalWisp ? localWisp : "wss://anura.pro/wisp/");
-
-  const { ScramjetController } = await import("/scramjet/scramjet.bundle.js");
-  const { BareMuxConnection } = await import("/bare-mux/index.mjs");
-
-  const controller = new ScramjetController({
-    prefix: "/scramjet/",
-    files: {
-      wasm: "/scramjet/scramjet.wasm.wasm",
-      all: "/scramjet/scramjet.all.js",
-      sync: "/scramjet/scramjet.sync.js",
-    },
-  });
-
-  const existing = await navigator.serviceWorker.getRegistrations();
-  await Promise.all(existing.map((r) => r.unregister()));
-  if (existing.length > 0) await new Promise((r) => setTimeout(r, 600));
-
-  await controller.init();
-  const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/scramjet/" });
-  await waitForActivation(reg);
-
-  const conn = new BareMuxConnection("/bare-mux/worker.js");
-  await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
-
-  codec = {
-    encodeUrl: (url) => controller.encodeUrl(url),
-    decodeUrl: (url) => controller.decodeUrl(url),
-  };
-}
-
-async function initUv() {
-  const customWisp = localStorage.getItem("velcro_wisp_server");
-  const localWisp = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
-  const hasLocalWisp = await fetch("/api/wisp-available").then(r => r.ok).catch(() => false);
-  const WISP = customWisp || (hasLocalWisp ? localWisp : "wss://anura.pro/wisp/");
-
-  await loadScript("/uv/uv.bundle.js");
-  await loadScript("/uv/uv.config.js");
-  const { BareMuxConnection } = await import("/bare-mux/index.mjs");
-
-  const existing = await navigator.serviceWorker.getRegistrations();
-  await Promise.all(existing.map((r) => r.unregister()));
-  if (existing.length > 0) await new Promise((r) => setTimeout(r, 600));
-  const reg = await navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/" });
-  await waitForActivation(reg);
-
-  const conn = new BareMuxConnection("/bare-mux/worker.js");
-  await conn.setTransport("/epoxy/index.mjs", [{ wisp: WISP }]);
-
-  const cfg = self.__uv$config;
-  codec = {
-    encodeUrl: (url) => cfg.prefix + cfg.encodeUrl(url),
-    decodeUrl: (encoded) => {
-      try {
-        const path = new URL(encoded).pathname;
-        return cfg.decodeUrl(path.slice(cfg.prefix.length));
-      } catch { return encoded; }
-    },
-  };
-}
+let currentUrl = "";
+const navHistory = [];
+let navIndex = -1;
 
 async function initProxy() {
-  if (!("serviceWorker" in navigator)) {
-    document.getElementById("browserBlocked").classList.remove("hidden");
-    return;
-  }
-
   try {
-    const engine = localStorage.getItem("velcro_proxy_engine") || "scramjet";
-    if (engine === "uv") await initUv();
-    else await initScramjet();
-
+    await libcurlProxy.init();
     ready = true;
 
     if (pendingUrl) {
@@ -158,17 +68,44 @@ function resolveUrl(input) {
   return `https://duckduckgo.com/?q=${encodeURIComponent(trimmed)}`;
 }
 
-function navigate(url) {
+async function navigate(url, opts) {
   if (!ready) { pendingUrl = url; return; }
+  const fromHistory = opts && opts.fromHistory;
 
-  const encoded = codec.encodeUrl(url);
   urlBar.value = url;
   showLoadingBar();
   showNavLoading();
 
   browserStart.style.display = "none";
+  browserTopbar.classList.remove("hidden");
   proxyFrame.classList.remove("hidden");
-  proxyFrame.src = encoded;
+
+  try {
+    const finalUrl = await libcurlProxy.navigate(
+      proxyFrame,
+      url,
+      (msg) => { navLoadingMsg.textContent = msg; },
+      onProxyNavigated
+    );
+    onProxyNavigated(finalUrl, fromHistory);
+  } catch (err) {
+    hideNavLoading();
+    navLoadingMsg.textContent = "failed: " + err.message;
+  }
+}
+
+function onProxyNavigated(finalUrl, fromHistory) {
+  currentUrl = finalUrl;
+  urlBar.value = finalUrl;
+  if (!fromHistory) {
+    navHistory.splice(navIndex + 1);
+    navHistory.push(finalUrl);
+    navIndex = navHistory.length - 1;
+  }
+  finishLoadingBar();
+  hideNavLoading();
+  const title = proxyFrame.contentDocument?.title;
+  if (title) document.title = `${title} — velcro`;
 }
 
 function showLoadingBar() {
@@ -197,32 +134,34 @@ urlBar.addEventListener("keydown", (e) => {
   }
 });
 
+if (homeUrlBar && homeGoBtn) {
+  homeGoBtn.addEventListener("click", () => {
+    const url = resolveUrl(homeUrlBar.value);
+    if (url) navigate(url);
+  });
+
+  homeUrlBar.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const url = resolveUrl(homeUrlBar.value);
+      if (url) navigate(url);
+    }
+  });
+}
+
 backBtn.addEventListener("click", () => {
-  try { proxyFrame.contentWindow?.history.back(); } catch {}
+  if (navIndex <= 0) return;
+  navIndex--;
+  navigate(navHistory[navIndex], { fromHistory: true });
 });
 
 forwardBtn.addEventListener("click", () => {
-  try { proxyFrame.contentWindow?.history.forward(); } catch {}
+  if (navIndex >= navHistory.length - 1) return;
+  navIndex++;
+  navigate(navHistory[navIndex], { fromHistory: true });
 });
 
 reloadBtn.addEventListener("click", () => {
-  if (!proxyFrame.classList.contains("hidden")) {
-    showLoadingBar();
-    proxyFrame.contentWindow?.location.reload();
-  }
-});
-
-proxyFrame.addEventListener("load", () => {
-  finishLoadingBar();
-  hideNavLoading();
-  try {
-    const frameUrl = proxyFrame.contentWindow?.location.href;
-    if (frameUrl && frameUrl !== "about:blank") {
-      urlBar.value = codec.decodeUrl(frameUrl) || frameUrl;
-    }
-    const title = proxyFrame.contentDocument?.title;
-    if (title) document.title = `${title} — velcro`;
-  } catch {}
+  if (currentUrl) navigate(currentUrl, { fromHistory: true });
 });
 
 document.querySelectorAll(".quick-link").forEach((btn) => {
@@ -239,7 +178,7 @@ function sanitizeDeepLink(raw) {
 }
 const deepLinkUrl = sanitizeDeepLink(new URLSearchParams(location.search).get("url"));
 if (deepLinkUrl) {
-  history.replaceState({}, "", "/browser.html");
+  history.replaceState({}, "", "/");
   pendingUrl = deepLinkUrl;
 }
 
