@@ -676,3 +676,87 @@ html.high-contrast .settings-group { border-width: 2px; }
 }
 
 .cloud-badge .material-symbols-rounded { font-size: 16px; }
+
+#stickyNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px clamp(16px, 4vw, 32px);
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 6px 16px var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+#stickyNav.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.sticky-nav-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--accent-bright);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sticky-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sticky-nav-links::-webkit-scrollbar { display: none; }
+
+.sticky-nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+  text-transform: lowercase;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sticky-nav-links a .material-symbols-rounded { font-size: 16px; }
+.sticky-nav-links a:hover { border-color: var(--accent); color: var(--accent-bright); }
+.sticky-nav-links a.active { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+
+.sticky-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sticky-nav-search { padding: 6px 12px; }
+.sticky-nav-search .search-input { width: 130px; font-size: 13px; }
+.sticky-nav-search .search-icon { font-size: 17px; }
+
+#stickyNavTheme { width: 34px; height: 34px; }
+#stickyNavTheme .material-symbols-rounded { font-size: 18px; }
+
+@media (max-width: 900px) {
+  .sticky-nav-links a .sticky-nav-label { display: none; }
+  .sticky-nav-search { display: none; }
+}
