@@ -825,6 +825,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="games" class="active"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
@@ -847,6 +848,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps" class="active"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
@@ -863,6 +865,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies" class="active"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
@@ -873,12 +876,30 @@ html, body.player-open { overflow: hidden; }
   </main>
 </div>
 
+<div class="view" id="view-cloudgaming">
+  <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
+  <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
+    <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
+    <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
+    <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming" class="active"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
+    <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
+    <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
+    <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
+  </nav>
+  <main>
+    <section class="hero"><h1>cloud gaming</h1><p class="tagline">real android apps, streamed &mdash; not a proxy, an actual cloud instance</p></section>
+    <section class="games-grid" id="cloudGrid"></section>
+  </main>
+</div>
+
 <div class="view" id="view-browser">
   <header class="topbar"><div class="topbar-right" style="margin-left:auto;"></div></header>
   <nav class="site-nav view-nav" style="justify-content: center; padding: 0 20px 20px;">
     <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser" class="active"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
@@ -899,6 +920,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat" class="active"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account"><span class="material-symbols-rounded">person</span>account</a>
@@ -915,6 +937,7 @@ html, body.player-open { overflow: hidden; }
     <a data-view="games"><span class="material-symbols-rounded">sports_esports</span>games</a>
     <a data-view="apps"><span class="material-symbols-rounded">apps</span>apps</a>
     <a data-view="movies"><span class="material-symbols-rounded">movie</span>movies</a>
+    <a data-view="cloudgaming"><span class="material-symbols-rounded">cloud</span>cloud gaming</a>
     <a data-view="browser"><span class="material-symbols-rounded">public</span>browser</a>
     <a data-view="chat"><span class="material-symbols-rounded">forum</span>chat</a>
     <a data-view="account" class="active"><span class="material-symbols-rounded">person</span>account</a>
@@ -3920,6 +3943,28 @@ renderGames();
 
 const appsGrid = document.getElementById("appsGrid");
 APPS.forEach(a => appsGrid.appendChild(buildCard(a, item => launchGame(item.url, item.title))));
+
+// cloud gaming: same curated nowgg.fun catalog as the real site's
+// cloud-gaming.js. These need the actual browser tab (not the game
+// player) — nowgg.fun re-navigates itself across a few redirects to
+// find its game server, which the browser tab's proxy session handles
+// the same way it did in testing (confirmed working end-to-end).
+const CLOUD_APPS = [
+  { title: "Roblox", category: "adventure", thumbnail: "https://nowgg.fun/img/roadblock.png", url: "https://nowgg.fun/apps/a/19900/b.html" },
+  { title: "Stumble Guys", category: "arcade", thumbnail: "https://nowgg.fun/img/stumbleguys.jpg", url: "https://nowgg.fun/apps/a/10011/b.html" },
+  { title: "Call of Duty", category: "action", thumbnail: "https://nowgg.fun/img/cod.jpg", url: "https://nowgg.fun/apps/a/10008/b.html" },
+  { title: "Melon Sandbox", category: "sandbox", thumbnail: "https://nowgg.fun/img/melon-sandbox.png", url: "https://nowgg.fun/apps/playducky/7199/melon-sandbox.html" },
+  { title: "Cookie Run", category: "arcade", thumbnail: "https://nowgg.fun/img/cookierun.jpg", url: "https://nowgg.fun/apps/a/10019/b.html" },
+  { title: "Geometry Dash", category: "arcade", thumbnail: "https://nowgg.fun/img/geodash.png", url: "https://nowgg.fun/apps/robtop-games/1400/geometry-dash.html" },
+  { title: "Rocket League", category: "sports", thumbnail: "https://nowgg.fun/img/rocketleague.webp", url: "https://nowgg.fun/apps/psyonix-studios/4656/rocket-league.html" },
+  { title: "Fortnite", category: "action", thumbnail: "https://nowgg.fun/img/fortnite.png", url: "https://nowgg.fun/apps/aptoide/5874/aptoide.html?deep_link=aptoidesearch://com.epicgames.fortnite" },
+  { title: "Minecraft", category: "sandbox", thumbnail: "https://nowgg.fun/img/minecraft.png", url: "https://nowgg.fun/apps/aptoide/5874/aptoide.html?deep_link=aptoidesearch://com.mojang.minecrafttrialpe" },
+];
+const cloudGrid = document.getElementById("cloudGrid");
+CLOUD_APPS.forEach(app => cloudGrid.appendChild(buildCard(app, item => {
+  showView("browser");
+  browserNavigate(item.url);
+})));
 
 const moviesGrid = document.getElementById("moviesGrid");
 const moviesStatus = document.getElementById("moviesStatus");
