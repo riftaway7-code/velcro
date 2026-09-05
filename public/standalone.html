@@ -916,6 +916,7 @@ html, body.player-open { overflow: hidden; }
 .switch .knob { position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-muted); transition: transform 0.2s ease, background 0.2s ease; }
 .switch.on { border-color: var(--accent); }
 .switch.on .knob { transform: translateX(22px); background: var(--accent); }
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -1031,12 +1032,33 @@ html, body.player-open { overflow: hidden; }
     <a data-view="settings"><span class="material-symbols-rounded">settings</span>settings</a>
   </nav>
   <main>
-    <section class="hero"><h1>home</h1><p class="tagline" id="proxyStatus"></p></section>
-    <div class="browser-bar">
-      <input id="urlBar" class="search-input" style="background:var(--bg-elevated); border:2px solid var(--border); border-radius:999px; padding:10px 16px;" placeholder="enter a url" />
-      <button id="goBtn" class="pill active" style="border:none;">go</button>
+    <div class="browser-start" id="browserStart">
+      <section class="hero" style="padding-top:min(12vh,110px);">
+        <h1>velcro</h1>
+        <p class="tagline">tunnel anywhere, no cap</p>
+      </section>
+      <div class="search-wrapper" style="width:min(560px,90vw); margin:0 auto 24px; padding:12px 20px;">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input id="homeUrlBar" class="search-input" style="width:100%; font-size:16px;" placeholder="search or enter a url" spellcheck="false" autocomplete="off" />
+        <button id="homeGoBtn" class="pill active" style="border:none; flex-shrink:0;">go</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-width:480px; margin:0 auto;">
+        <button class="pill" data-url="https://google.com">google</button>
+        <button class="pill" data-url="https://youtube.com">youtube</button>
+        <button class="pill" data-url="https://reddit.com">reddit</button>
+        <button class="pill" data-url="https://github.com">github</button>
+        <button class="pill" data-url="https://wikipedia.org">wikipedia</button>
+        <button class="pill" data-url="https://discord.com">discord</button>
+      </div>
     </div>
-    <iframe id="proxyFrame" class="proxy-frame"></iframe>
+    <div class="hidden" id="browserFrameWrap">
+      <div class="browser-bar">
+        <input id="urlBar" class="search-input" style="background:var(--bg-elevated); border:2px solid var(--border); border-radius:999px; padding:10px 16px;" placeholder="enter a url" />
+        <button id="goBtn" class="pill active" style="border:none;">go</button>
+      </div>
+      <p class="tagline" id="proxyStatus" style="text-align:center;"></p>
+      <iframe id="proxyFrame" class="proxy-frame"></iframe>
+    </div>
   </main>
 </div>
 
@@ -4918,6 +4940,8 @@ function resolveUrl(input) {
   return "https://duckduckgo.com/?q=" + encodeURIComponent(t);
 }
 function browserNavigate(url) {
+  document.getElementById("browserStart").classList.add("hidden");
+  document.getElementById("browserFrameWrap").classList.remove("hidden");
   urlBar.value = url;
   const isLocal = url.startsWith(location.origin + "/") || url.startsWith("/");
   if (isLocal) { proxyFrame.removeAttribute("srcdoc"); proxyFrame.src = url; return; }
@@ -4926,6 +4950,11 @@ function browserNavigate(url) {
 }
 document.getElementById("goBtn").addEventListener("click", () => { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); });
 urlBar.addEventListener("keydown", e => { if (e.key === "Enter") { const u = resolveUrl(urlBar.value); if (u) browserNavigate(u); } });
+
+const homeUrlBar = document.getElementById("homeUrlBar");
+document.getElementById("homeGoBtn").addEventListener("click", () => { const u = resolveUrl(homeUrlBar.value); if (u) browserNavigate(u); });
+homeUrlBar.addEventListener("keydown", e => { if (e.key === "Enter") { const u = resolveUrl(homeUrlBar.value); if (u) browserNavigate(u); } });
+document.querySelectorAll("#browserStart [data-url]").forEach(btn => btn.addEventListener("click", () => browserNavigate(btn.dataset.url)));
 
 // --- game player (dedicated fullscreen overlay, matching game.html) ---
 const gamePlayer = document.getElementById("gamePlayer");
