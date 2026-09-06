@@ -97,6 +97,8 @@
     .then(function (data) {
       apps = data;
       buildPills();
+      var q = new URLSearchParams(location.search).get("q");
+      if (q) searchInput.value = q;
       renderGrid();
     })
     .catch(function (err) {

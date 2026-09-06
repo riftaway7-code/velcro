@@ -297,5 +297,11 @@
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) loadMore();
   });
 
-  loadMore();
+  var initialQuery = new URLSearchParams(location.search).get("q");
+  if (initialQuery) {
+    searchInput.value = initialQuery;
+    runSearch();
+  } else {
+    loadMore();
+  }
 })();

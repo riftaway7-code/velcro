@@ -237,9 +237,74 @@ const AI_TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "navigate_view",
+      description: "Navigate velcro itself (not the browser panel) to a different section of the site. Use this whenever the user asks to go to, open, or switch to a page like games, apps, movies, cloud gaming, chat, their account, or settings.",
+      parameters: {
+        type: "object",
+        properties: { view: { type: "string", enum: ["home", "games", "apps", "movies", "cloudgaming", "chat", "account", "settings"] } },
+        required: ["view"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_library",
+      description: "Navigate to velcro's games, apps, or movies page with a search already applied, so the user sees matching results immediately. Use this whenever they ask to find or search for a game/app/movie.",
+      parameters: {
+        type: "object",
+        properties: {
+          view: { type: "string", enum: ["games", "apps", "movies"] },
+          query: { type: "string", description: "what to search for" },
+        },
+        required: ["view", "query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "launch_game",
+      description: "Find a game in velcro's library by name and launch it directly, skipping the games page entirely. Use this whenever the user asks to play a specific game by name.",
+      parameters: { type: "object", properties: { name: { type: "string", description: "the game's name, doesn't need to be exact" } }, required: ["name"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_theme",
+      description: "Change velcro's color theme to a custom background/accent color pair the user asks for (e.g. \"make it blue\", \"purple theme\"). Colors must be hex codes.",
+      parameters: {
+        type: "object",
+        properties: {
+          background: { type: "string", description: "hex color for the background, e.g. #1a1a2e" },
+          accent: { type: "string", description: "hex color for the accent, e.g. #e94560" },
+        },
+        required: ["background", "accent"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_wallpaper",
+      description: "Change velcro's background wallpaper. Use one of the preset names, or \"none\" to clear it.",
+      parameters: {
+        type: "object",
+        properties: { style: { type: "string", enum: ["none", "aurora", "sunset", "citrus", "candy", "dusk", "grape"] } },
+        required: ["style"],
+      },
+    },
+  },
 ];
 
-const CLIENT_ACTION_TOOLS = new Set(["open_url", "scroll_browser", "click_browser", "go_back_browser", "close_browser"]);
+const CLIENT_ACTION_TOOLS = new Set([
+  "open_url", "scroll_browser", "click_browser", "go_back_browser", "close_browser",
+  "navigate_view", "search_library", "launch_game", "set_theme", "set_wallpaper",
+]);
 
 function toolStatusLabel(name, args) {
   const host = (u) => { try { return new URL(u).hostname; } catch { return u; } };
@@ -252,6 +317,11 @@ function toolStatusLabel(name, args) {
     case "go_back_browser": return "Going back";
     case "close_browser": return "Closing the browser panel";
     case "run_code": return "Writing and running the code";
+    case "navigate_view": return `Opening ${args.view}`;
+    case "search_library": return `Searching ${args.view} for "${args.query}"`;
+    case "launch_game": return `Launching ${args.name}`;
+    case "set_theme": return "Changing the theme";
+    case "set_wallpaper": return "Changing the wallpaper";
     default: return "Working";
   }
 }
@@ -293,6 +363,11 @@ const AI_SYSTEM_PROMPT =
   "whenever asked to build, code, or demo something visual or interactive. If the user already has a page " +
   "open in the panel, its current text is given to you below as context — use it to answer questions about " +
   "that page without needing to fetch it again. " +
+  "You also control velcro itself, not just the browser panel: navigate_view switches the site to a " +
+  "different page (games, apps, movies, cloud gaming, chat, account, settings, home), search_library jumps " +
+  "to games/apps/movies with a search already applied, launch_game finds a game by name and starts it " +
+  "immediately, and set_theme/set_wallpaper change the site's look. Use these whenever the user asks to go " +
+  "somewhere, find or play something, or change how velcro looks — don't just describe how to do it, do it. " +
   "Keep answers well-formatted with markdown and LaTeX ($...$ or \\(...\\)) for any math.";
 
 // The jsdelivr-hosted build of the standalone site (embedded via SVG

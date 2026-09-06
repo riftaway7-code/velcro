@@ -120,12 +120,60 @@
     try { browserFrame.contentWindow.history.back(); } catch {}
   }
 
+  // navigate_view/search_library/launch_game/set_theme/set_wallpaper let the
+  // ai drive velcro itself, not just the browser panel — this page (ai.html)
+  // is one of several separate pages on the real site, so "navigating" means
+  // an actual page load, not a client-side view swap like standalone.html.
+  const VIEW_PAGES = {
+    home: "/index.html", games: "/games.html", apps: "/apps.html", movies: "/movies.html",
+    cloudgaming: "/cloud-gaming.html", chat: "/chat.html", account: "/account.html", settings: "/settings.html",
+  };
+
+  function navigateView(view) {
+    const page = VIEW_PAGES[view];
+    if (page) location.href = page;
+  }
+
+  function searchLibrary(view, query) {
+    const page = VIEW_PAGES[view];
+    if (page) location.href = page + "?q=" + encodeURIComponent(query || "");
+  }
+
+  let gamesCache = null;
+  async function loadGames() {
+    if (gamesCache) return gamesCache;
+    gamesCache = await fetch("/games.json").then((r) => r.json()).catch(() => []);
+    return gamesCache;
+  }
+
+  async function launchGame(name) {
+    const games = await loadGames();
+    const q = String(name || "").trim().toLowerCase();
+    if (!q || !games.length) return;
+    let best = games.find((g) => g.title.toLowerCase() === q);
+    if (!best) best = games.find((g) => g.title.toLowerCase().includes(q));
+    if (!best) best = games.find((g) => q.includes(g.title.toLowerCase()));
+    if (!best) return;
+    const url = "/game.html?url=" + encodeURIComponent(best.url) + "&title=" + encodeURIComponent(best.title);
+    if (localStorage.getItem("velcro_launch_mode") === "about-blank") {
+      const w = window.open("about:blank", "_blank");
+      if (w) w.location.href = url;
+    } else {
+      location.href = url;
+    }
+  }
+
   async function applyAction(action) {
     if (action.type === "open_url") await openInSidebar(action.url, action.title, { sandboxed: !!action.sandboxed });
     else if (action.type === "scroll_browser") scrollBrowser(action.direction, action.amount);
     else if (action.type === "click_browser") clickBrowser(action.text);
     else if (action.type === "go_back_browser") goBackBrowser();
     else if (action.type === "close_browser") closeBrowser();
+    else if (action.type === "navigate_view") navigateView(action.view);
+    else if (action.type === "search_library") searchLibrary(action.view, action.query);
+    else if (action.type === "launch_game") await launchGame(action.name);
+    else if (action.type === "set_theme") window.VelcroTheme?.setCustom(action.background, action.accent);
+    else if (action.type === "set_wallpaper") window.VelcroTheme?.setWallpaper(action.style);
   }
 
   function getPageContext() {

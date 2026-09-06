@@ -298,6 +298,10 @@
     .then(function (data) {
       games = data;
       buildPills();
+      // ?q= lets the ai (or any link) land here with a search pre-applied,
+      // same searchInput the user would type into themselves.
+      var q = new URLSearchParams(location.search).get("q");
+      if (q) searchInput.value = q;
       renderGrid();
       renderFavorites();
       renderRecent();

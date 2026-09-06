@@ -5080,12 +5080,35 @@ async function launchGame(url, title) {
     try { browserFrame.contentWindow.history.back(); } catch (e) {}
   }
 
+  function launchGameByName(name) {
+    const q = String(name || "").trim().toLowerCase();
+    if (!q) return;
+    let best = GAMES.find(g => g.title.toLowerCase() === q);
+    if (!best) best = GAMES.find(g => g.title.toLowerCase().includes(q));
+    if (!best) best = GAMES.find(g => q.includes(g.title.toLowerCase()));
+    if (!best) return;
+    launchGame(best.url.startsWith("/") ? location.origin + best.url : best.url, best.title);
+  }
+
   async function applyAiAction(action) {
     if (action.type === "open_url") await openInAiBrowser(action);
     else if (action.type === "scroll_browser") scrollAiBrowser(action.direction, action.amount);
     else if (action.type === "click_browser") clickAiBrowser(action.text);
     else if (action.type === "go_back_browser") goBackAiBrowser();
     else if (action.type === "close_browser") closeAiBrowser();
+    else if (action.type === "navigate_view") showView(action.view);
+    else if (action.type === "search_library") {
+      showView(action.view);
+      // this build only has an in-page search box on the games view —
+      // apps/movies just land on the tab itself, no filter to apply.
+      if (action.view === "games") {
+        gamesSearch.value = action.query || "";
+        renderGames();
+      }
+    }
+    else if (action.type === "launch_game") launchGameByName(action.name);
+    else if (action.type === "set_theme") window.VelcroTheme?.setCustom(action.background, action.accent);
+    else if (action.type === "set_wallpaper") window.VelcroTheme?.setWallpaper(action.style);
   }
 
   function getAiPageContext() {
