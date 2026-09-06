@@ -779,7 +779,7 @@ html.high-contrast .settings-group { border-width: 2px; }
 }
 
 
-html, body.player-open { overflow: hidden; }
+html.player-open, body.player-open { overflow: hidden; }
 .view { display: none; }
 .view.active { display: block; }
 .site-nav a { cursor: pointer; }
@@ -4974,6 +4974,7 @@ glDismiss.addEventListener("click", hideLoader);
 function closePlayer() {
   gamePlayer.classList.remove("open");
   document.body.classList.remove("player-open");
+  document.documentElement.classList.remove("player-open");
   gameFrame.removeAttribute("srcdoc");
   gameFrame.src = "about:blank";
 }
@@ -4983,6 +4984,7 @@ document.getElementById("playerClose").addEventListener("click", closePlayer);
 async function launchGame(url, title) {
   gamePlayer.classList.add("open");
   document.body.classList.add("player-open");
+  document.documentElement.classList.add("player-open");
   document.getElementById("gameTitle").textContent = title;
   document.getElementById("glTitle").textContent = title;
   loaderHidden = false;
