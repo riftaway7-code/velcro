@@ -238,6 +238,27 @@
 </head>
 <body>
 
+<div id="adSorryOverlay" style="position:fixed; inset:0; z-index:99998; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); padding:20px;">
+  <div style="max-width:420px; width:100%; background:var(--bg-elevated); border:2px solid var(--border); border-radius:22px; padding:28px 24px; text-align:center; box-shadow:0 14px 28px var(--shadow);">
+    <p style="margin:0 0 18px; color:var(--text); font-family:var(--font-body); font-size:15px; line-height:1.5;">im so sorry for the ads i cant keep up with paying for the vps. this is the only way for them links</p>
+    <button id="adSorryClose" style="border:none; border-radius:999px; padding:10px 24px; font-family:var(--font-body); font-weight:700; font-size:14px; cursor:pointer; background:var(--accent); color:#fff;">ok</button>
+  </div>
+</div>
+<script>
+(function () {
+  try {
+    if (sessionStorage.getItem('adSorrySeen')) {
+      document.getElementById('adSorryOverlay').remove();
+      return;
+    }
+  } catch (e) {}
+  document.getElementById('adSorryClose').addEventListener('click', function () {
+    document.getElementById('adSorryOverlay').remove();
+    try { sessionStorage.setItem('adSorrySeen', '1'); } catch (e) {}
+  });
+})();
+</script>
+
 <script src="/unload-guard.js"></script>
 <script src="/cloak.js"></script>
 <script src="/panic.js"></script>
